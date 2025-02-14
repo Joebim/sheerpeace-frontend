@@ -1,5 +1,6 @@
 # 1️⃣ Base image with dependencies
-FROM node:19.8.0-alpine as base
+	
+FROM node:19-bullseye as base
 RUN apk add --no-cache g++ make py3-pip libc6-compat
 WORKDIR /app
 COPY package*.json ./
