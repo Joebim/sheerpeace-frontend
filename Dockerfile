@@ -17,7 +17,7 @@ RUN npm run build
 FROM base as production
 WORKDIR /app
 ENV NODE_ENV=production
-RUN npm ci --omit=dev  # Install only production dependencies
+RUN npm ci --omit=dev 
 
 # Security: Create a non-root user for Next.js
 RUN addgroup -g 1001 -S nodejs
