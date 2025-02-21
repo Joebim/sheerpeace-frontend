@@ -9,6 +9,18 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "**",
       },
+      {
+        protocol: "https",
+        hostname: "api.sheerpeace.store",
+        port: "",
+        pathname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "5000",
+        pathname: "/uploads/**", 
+      },
     ],
   },
 };
