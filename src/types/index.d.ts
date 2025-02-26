@@ -99,3 +99,23 @@ export type Color = {
     variants?: Variant[]; // Can be expanded based on the specific variant structure
   };
   
+  export type FeaturedOffering = {
+    id: string;
+    title: string;
+    description: string;
+    image_url: string;
+    link: string;
+    keywords: string[];
+    is_featured: boolean;
+    trending: boolean;
+    is_new: boolean;
+    top_selling: boolean;
+    top_choice: boolean;
+    rating: string; // If rating should be a number, change to `number`
+    category_id: string | null;
+    subcategory_id: string | null;
+    is_discounted: boolean;
+    created_at: string; // If using Date objects, change to `Date`
+    updated_at: string; // If using Date objects, change to `Date`
+  };
+  
