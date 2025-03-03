@@ -27,7 +27,7 @@ export default function FeaturedCategory() {
   ];
 
   return (
-    <div className="p-4 sm:px-24">
+    <div className="">
       <div className="grid grid-rows-2 grid-flow-col gap-6 h-[600px]">
         {collections.map((category, index) => (
           <Link
@@ -50,7 +50,7 @@ export default function FeaturedCategory() {
               alt={category.name}
               className="absolute inset-0 w-full h-full object-cover opacity-80"
             />
-            <div className="flex flex-row gap-[10px] relative z-10 text-black bg-white text-lg font-bold px-4 py-2 rounded-full">
+            <div className="flex flex-row gap-[10px] relative z-10 text-sheerpeace-black bg-white text-lg font-bold px-4 py-2 rounded-full">
               <p className="">{category.name}</p>
               <ArrowUpRight />
             </div>

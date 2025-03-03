@@ -19,7 +19,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </div>
       {product.is_discounted && (
         <div className="">
-          <div className="bg-black absolute top-[15px] left-[10px] bg-primary-100 text-[9px] text-white px-[6px] py-[4px] rounded-[5px]">
+          <div className="bg-sheerpeace-black absolute top-[15px] left-[10px] bg-primary-100 text-[9px] text-white px-[6px] py-[4px] rounded-[5px]">
             {product.discount_percentage}% OFF
           </div>
         </div>
@@ -37,7 +37,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
           <div className="flex flex-col gap-[8px] p-[10px]">
             <h3 className="text-[12px] font-bold">
-              {shortenText(product?.name, 23)}
+              {shortenText(product?.name, 21)}
             </h3>
             <p className="text-[12px]">{formatPrice(product?.price)}</p>
           </div>

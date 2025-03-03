@@ -11,6 +11,14 @@ export default {
   theme: {
     extend: {
       colors: {
+        sheerpeace: {
+          purple: "#B598CE",
+          "purple-secondary": "#8D00E8",
+          blue: "#8FD7FF",
+          black: "#1A1A1A",
+          yellow: "#FFC95C",
+          grey: "#F3F5F7",
+        },
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {

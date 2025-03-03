@@ -25,14 +25,14 @@ const ProductSection: React.FC<ProductSectionProps> = ({
   loading
 }) => {
   return (
-    <div className="px-[1.4rem] sm:px-[6.25rem]">
+    <div className="">
       <div className="flex flex-col gap-[20px]">
         <div className="flex flex-row justify-between items-center">
-          <h2 className="text-xl sm:text-2xl  font-bold text-centerself-start">
+          <h2 className="text-xl sm:text-[18px]  font-bold text-center self-start">
             {headerTitle}
           </h2>
           <div className="flex flex-row gap-[10px] items-center">
-            <span className="font-bold">See More</span>
+            <span className="font-bold text-[14px]">See More</span>
             <div className="h-[25px] w-[25px] rounded-full bg-primary-100 flex justify-center items-center">
               <ArrowRight className="text-light w-[17px]" />
             </div>
@@ -60,8 +60,42 @@ const ProductSection: React.FC<ProductSectionProps> = ({
                     </CarouselItem>
                   ))}
             </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
+            <CarouselPrevious className="absolute top-1/2 left-[20px] transform -translate-y-1/2">
+                    <button className="bg-white p-2 rounded-full">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 19l-7-7 7-7"
+                        />
+                      </svg>
+                    </button>
+                  </CarouselPrevious>
+                  <CarouselNext className="absolute top-1/2 right-[20px] transform -translate-y-1/2">
+                    <button className="bg-white p-2 rounded-full">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+                  </CarouselNext>
           </Carousel>
         </div>
       </div>

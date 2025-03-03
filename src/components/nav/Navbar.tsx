@@ -1,118 +1,221 @@
 "use client";
 
-import { NextPage } from "next";
-import Image from "next/image";
 import Link from "next/link";
+import { useCartStore } from "@/store/cart.store";
+import useUserStore from "@/store/user.store";
+import { UserDropdownMenu } from "../home/UserdropdownMenu";
+import {
+  Bell,
+  ChevronDown,
+  DollarSign,
+  Languages,
+  Search,
+  ShoppingBag,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { ShoppingCart, Menu, User, Search } from "lucide-react";
-// import { useCartStore } from "@/store/useCartStore"; // Assuming Zustand is used
+import { NotificationDropdown } from "../home/NotificationDropdown";
+import useNotificationStore from "@/store/notification.store";
+import Image from "next/image";
 
-const Navbar: NextPage = () => {
+// interface Notification {
+//   id: string;
+//   heading: string;
+//   message: string;
+//   type: "warning" | "info" | "success" | "error";
+//   isRead: boolean;
+// }
+
+const ALLOWED_SEARCH_ROUTES = ["/shoppers/:id"];
+
+const ShoppersNav: React.FC = () => {
+  const { cart } = useCartStore();
+  const { user, isAuthenticated } = useUserStore();
   const pathname = usePathname();
-  const cartItems = ["item 1", "item 2"];
+  const [isHydrated, setIsHydrated] = useState(false);
+  const { notifications } = useNotificationStore();
+
+  const showSearch = ALLOWED_SEARCH_ROUTES.includes(pathname);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  if (!isHydrated) return null;
 
   return (
-    <header className="w-full bg-white shadow-sm sticky">
-      <div className="flex flex-row items-center gap-[20px] w-full justify-between py-4 px-4 sm:px-24">
-        {/* Mobile Menu */}
-
-        <div className="flex items-center gap-[10px]">
-          <Sheet>
-            <SheetTrigger className="sm:hidden">
-              <Menu className="h-6 w-6" />
-            </SheetTrigger>
-            <SheetContent side="left" className="w-64">
-              <nav className="flex flex-col space-y-4">
-                <Link href="/" className="text-lg font-medium">
-                  Home
-                </Link>
-                <Link href="/products" className="text-lg font-medium">
-                  Shop
-                </Link>
-                <Link href="/about" className="text-lg font-medium">
-                  About
-                </Link>
-                <Link href="/contact" className="text-lg font-medium">
-                  Contact
-                </Link>
-              </nav>
-            </SheetContent>
-          </Sheet>
-
-          {/* Logo */}
-          <Link href="/">
-            <Image
-              src="/sheerpeace.svg"
-              height={50}
-              width={150}
-              alt="Sheer Peace Logo"
-              className="w-[100px]"
-            />
-          </Link>
-        </div>
-
-        <div className="relative hidden md:flex flex-grow items-center justify-end">
-          <div className="flex flex-row items-center gap-[5px] w-[80%] rounded-full border pl-4 border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
-            <Search />
-            <Input
+    <nav className="bg-sheerpeace-purple-secondary text-[13px] py-[10px] gap-[15px] w-full text-white px-6 sm:px-12 flex flex-col items-center z-[1000] shadow-md">
+      <div className="w-full">
+        <div className="flex w-full items-center justify-between relative">
+          <div>
+            <Link href="/">
+              <Image
+                src="/sheerpeace-white.svg"
+                height={50}
+                width={150}
+                alt="Sheer Peace Logo"
+                className="w-[100px]"
+              />
+            </Link>
+          </div>
+          {/* Search Bar (Desktop) */}
+          <div className="md-[200px] lg:w-[600px] relative hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100">
+            <Search className="cursor-pointer text-sheerpeace-purple" />
+            <input
               type="text"
-              placeholder="Search products..."
-              className="text-sm outline-none border-none ring-transparent focus-visible:ring-transparent shadow-none"
+              placeholder="Search"
+              className="bg-transparent outline-none text-sheerpeace-black"
             />
           </div>
-        </div>
-        {/* Right Section: Search, Cart, User */}
-        <div className="flex flex-row items-center gap-[20px]">
-          {/* Search Bar */}
-          <Link href="/cart" className="relative sm:hidden block">
-            <div className="flex flex-row gap-[10px] items-center text-gray-800 hover:text-blue-600">
-              <Search className="h-6 w-6" />
+          {/* Right Section - Actions */}
+          <div className="flex items-center gap-6">
+            {/* Notifications */}
+            <div className="relative">
+              <NotificationDropdown>
+                <div>
+                  <Bell className="cursor-pointer text-white hover:text-gray-200" />
+                  {notifications.some((notif) => !notif.is_read) && (
+                    <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full"></span>
+                  )}
+                </div>
+              </NotificationDropdown>
             </div>
-          </Link>
-          {/* Cart Icon */}
-          <Link href="/cart" className="relative">
-            <div className="flex flex-row gap-[10px] items-center text-gray-800 hover:text-blue-600">
-              <ShoppingCart className="h-6 w-6" />
-              {/* {cartItems.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                {cartItems}
-              </span>
-            )} */}
-              <p className="text-sm hidden sm:block">Cart</p>
-            </div>
-          </Link>
 
-          {/* User Profile */}
-          <Sheet>
-            <SheetTrigger className="flex flex-row gap-[10px] items-center text-gray-800 hover:text-blue-600">
-              <User className="h-6 w-6" />
-              <p className="text-sm hidden sm:block">Account</p>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-64">
-              <div className="p-4">
-                <Link
-                  href="/account"
-                  className="block text-lg font-medium hover:text-blue-600"
-                >
-                  My Account
-                </Link>
-                <Link
-                  href="/orders"
-                  className="block mt-3 text-lg font-medium hover:text-blue-600"
-                >
-                  Orders
-                </Link>
-                <Button className="w-full mt-5">Log out</Button>
+            {/* Shopping Cart */}
+            <div className="relative">
+              <Link href="/shoppers/cart">
+                <ShoppingBag className="cursor-pointer text-white hover:text-gray-200" />
+                {(cart?.items?.length ?? 0) > 0 && (
+                  <span className="absolute top-0 right-0 bg-purple-600 rounded-full h-[10px] w-[10px]"></span>
+                )}
+              </Link>
+            </div>
+
+            {/* User Account */}
+            <UserDropdownMenu>
+              <div className="group cursor-pointer flex items-center gap-2">
+                <Image
+                  src="/images/user.svg"
+                  height={50}
+                  width={150}
+                  alt="Sheer Peace Logo"
+                  className="w-[30px] text-white group-hover:text-gray-200"
+                />
+                <p className="hidden md:block text-white font-medium group-hover:text-gray-200">
+                  {isAuthenticated ? `Hi, ${user?.first_name}` : "Account"}
+                </p>
+                <ChevronDown className="hidden md:block text-white" />
               </div>
-            </SheetContent>
-          </Sheet>
+            </UserDropdownMenu>
+          </div>
         </div>
       </div>
-    </header>
+
+      <div className="w-full">
+        <div className="flex w-full items-center justify-between relative">
+          {/* Left Section - Logo */}
+
+          <div className="py-[5px] px-[20px] rounded-[5px] bg-sheerpeace-yellow text-sheerpeace-black">
+            ALL CATEGORIES
+          </div>
+
+          {/* Center Section - Navigation Links */}
+          <ul className="hidden md:flex space-x-6 text-white font-medium">
+            <li>
+              <Link href="/shop" className="hover:text-gray">
+                Home
+              </Link>
+            </li>
+            <li>
+              <Link href="/collections" className="hover:text-gray-200">
+                Features
+              </Link>
+            </li>
+            <li>
+              <Link href="/about" className="hover:text-gray-200">
+                Collections
+              </Link>
+            </li>
+            <li>
+              <Link href="/contact" className="hover:text-gray-200">
+                Accessories
+              </Link>
+            </li>
+            <li>
+              <Link href="/contact" className="hover:text-gray-200">
+                Blog
+              </Link>
+            </li>
+          </ul>
+
+          <ul className="hidden md:flex space-x-6 text-white font-medium">
+            <li>
+              <Link
+                href="/about"
+                className="hover:text-gray-200 flex flex-row items-center gap-[8px]"
+              >
+                <Image
+                  src="/images/delivery.svg"
+                  height={50}
+                  width={150}
+                  alt="delivery"
+                  className="w-[25px]"
+                />
+                <span>Track Your Order</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/about"
+                className="hover:text-gray-200 flex flex-row items-center gap-[8px]"
+              >
+                <Image
+                  src="/images/support.svg"
+                  height={50}
+                  width={150}
+                  alt="delivery"
+                  className="w-[20px]"
+                />
+                <span>Support (+123) 345 7477</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/about"
+                className="hover:text-gray-200 flex flex-row items-center gap-[8px]"
+              >
+                <Languages className="text-white w-[19px]" />
+                <span>English</span>
+                <ChevronDown />
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/about"
+                className="hover:text-gray-200 flex flex-row items-center gap-[8px]"
+              >
+                <DollarSign className="text-white w-[19px]" />
+                <span>US Dollar</span>
+                <ChevronDown />
+              </Link>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Search Bar (Mobile) */}
+      {showSearch && (
+        <div className="w-full flex sm:hidden items-center gap-2 px-4 py-2 bg-gray-100 rounded-full">
+          <Search className="text-white" />
+          <input
+            type="text"
+            placeholder="Search"
+            className="bg-transparent outline-none text-white"
+          />
+        </div>
+      )}
+    </nav>
   );
 };
 
-export default Navbar;
+export default ShoppersNav;
