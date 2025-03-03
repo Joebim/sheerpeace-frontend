@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/nav/Navbar";
+import ShowNav from "@/components/nav/ShowNav";
+import AnnounceBar from "@/components/AnnounceBar";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -21,8 +23,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppins.className} bg-gray-50`}>
-        <Navbar />
+      <body className={`${poppins.className} bg-white`}>
+        <AnnounceBar />
+        <ShowNav restrictedPaths={["/signup", "/login"]}>
+          <Navbar />
+        </ShowNav>
         {children}
       </body>
     </html>
