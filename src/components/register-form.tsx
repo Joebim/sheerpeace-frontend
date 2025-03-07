@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { registerUser } from "@/utils/authService";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import Link from "next/link";
 
 interface RegisterFormProps extends React.ComponentPropsWithoutRef<"form"> {
   onSuccess?: () => void;
@@ -26,6 +29,8 @@ export function RegisterForm({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -55,6 +60,8 @@ export function RegisterForm({
       const response = await registerUser(data);
       if (response) {
         onSuccess?.();
+        router.push("/login");
+        toast.success("Account created successfully. Please login to continue");
       }
     } catch (error: unknown) {
       setError(
@@ -147,16 +154,23 @@ export function RegisterForm({
 
         {error && <p className="text-sm text-red-500">{error}</p>}
 
-        <Button type="submit" className="w-full" disabled={loading}>
+        <Button
+          type="submit"
+          className="w-full bg-sheerpeace-purple-secondary text-white"
+          disabled={loading}
+        >
           {loading ? "Signing up..." : "Sign Up"}
         </Button>
       </div>
 
       <div className="text-center text-sm">
         Already have an account?{" "}
-        <a href="#" className="underline underline-offset-4">
+        <Link
+          href="/login"
+          className="underline underline-offset-4 text-sheerpeace-purple-secondary"
+        >
           Login
-        </a>
+        </Link>
       </div>
     </form>
   );

@@ -1,18 +1,17 @@
-import { GalleryVerticalEnd } from "lucide-react"
-
-import { RegisterForm } from "@/components/register-form"
-import Image from "next/image"
+import { RegisterForm } from "@/components/register-form";
+import Image from "next/image";
+import SheerpeaceWordmark from "../../../public/sheerpeace-word-mark.svg";
+import SheerpeaceLogo from "../../../public/sheerpeace-logo.svg";
+import { renderImageUrl } from "@/hooks/useRenderImageUrl";
 
 export default function SignupPage() {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex justify-center gap-2 md:justify-start">
-          <a href="#" className="flex items-center gap-2 font-medium">
-            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <GalleryVerticalEnd className="size-4" />
-            </div>
-            Acme Inc.
+          <a href="#" className="flex items-center font-medium">
+            <SheerpeaceLogo className="w-[25px]" />
+            <SheerpeaceWordmark className="fill-sheerpeace-purple-secondary scale-75" />
           </a>
         </div>
         <div className="flex flex-1 items-center justify-center">
@@ -23,13 +22,14 @@ export default function SignupPage() {
       </div>
       <div className="relative hidden bg-muted lg:block">
         <Image
-          src="/placeholder.svg"
+          src={renderImageUrl("/uploads/images/1741262206350-125433806.png")}
           alt="Image"
-          height={200}
-          width={200}
+          height={800}
+          width={800}
           className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+          priority
         />
       </div>
     </div>
-  )
+  );
 }

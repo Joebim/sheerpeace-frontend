@@ -9,12 +9,12 @@ interface ShowNavProps {
 }
 
 const ShowNav: React.FC<ShowNavProps> = ({ children, restrictedPaths }) => {
-  const [showNav, setShowNav] = useState(false);
   const pathname = usePathname() ?? "";
+  const [showNav, setShowNav] = useState(!restrictedPaths.includes(pathname));
 
   useEffect(() => {
     setShowNav(!restrictedPaths.includes(pathname));
-  }, [showNav, pathname, restrictedPaths]);
+  }, [pathname, restrictedPaths]);
 
   return <>{showNav ? children : null}</>;
 };

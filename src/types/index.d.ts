@@ -149,7 +149,6 @@ export type UserData = {
   __v: number;
 };
 
-
 export interface SelectedSize {
   label: string;
   gender: string;
@@ -218,3 +217,14 @@ export type Upload = {
   type: string;
   created_at: string;
 };
+
+export interface Blog {
+  id: string;
+  imageUrl: string;
+  title: string;
+  blogDate: string;
+  authorName: string;
+  authorImage: string;
+  postDate: string;
+  readingTime: string;
+}

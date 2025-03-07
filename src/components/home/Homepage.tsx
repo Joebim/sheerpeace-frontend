@@ -18,32 +18,38 @@ import DealSession from "./DealSession";
 import BannerSection from "./BannerSection";
 import SalesBanner from "./SalesBanner";
 import SideProductSession from "./SideProductSession";
+import SideBlogSection from "./SideBlogSection";
+import ProductBanner from "./ProductBanner";
+
 const Homepage: NextPage = ({}) => {
   const {
     data: featuredProducts,
     error,
-    loading: featuredProductsLoading,
+    loading,
   } = useFetch<Product[]>("/products");
   return (
     <>
-      <div className="flex flex-col gap-[20px] pt-[40px] px-12">
-        <div className="flex flex-row gap-[20px] w-full">
-          <div className="flex flex-col gap-[20px]">
-            <CategorySideCard />
-            <BenefitSection />
-            <SideProductSession title="Latest Products" products={featuredProducts}/>
+      <div className="flex flex-col gap-[20px] pt-[25px] sm:px-12 px-[20px]">
+        <div className="flex flex-col sm:flex-row gap-[20px]">
+          <div className="sm:flex-[55] sm:w-[55%] w-full">
+            <FeaturedCarousel />
           </div>
-          <div className="flex-grow flex flex-col gap-[20px]">
-            <div className="flex flex-row gap-[20px]">
-              {" "}
-              <div className="flex-[3]">
-                <FeaturedCarousel />
-              </div>
-              <div className="flex-[1.5]">
-                <OffersSideCard />
-              </div>
-            </div>
-
+          <div className="sm:flex-[30] sm:flex hidden flex-col gap-[20px] sm:w-[45%] w-full">
+            <ProductBanner loading={loading} />
+            <OffersSideCard loading={loading}/>
+          </div>
+        </div>
+        <div className="flex flex-row gap-[20px] w-full">
+          <div className="sm:flex hidden flex-col gap-[40px] w-[20%] pb-[20px]">
+            <BenefitSection />
+            <SideProductSession
+              title="Latest Products"
+              products={featuredProducts}
+              loading={loading}
+            />
+            <SideBlogSection headerTitle="Latest Blogs" loading={loading} />
+          </div>
+          <div className="flex-grow flex flex-col gap-[20px] w-[80%] pb-[30px]">
             <CouponTab
               Icon={Gift}
               title="Special Gift"
@@ -52,17 +58,21 @@ const Homepage: NextPage = ({}) => {
               code="192u893r3"
             />
 
-            <DealSession dealTitle="Daily Deals" products={featuredProducts} />
+            <DealSession
+              dealTitle="Daily Deals"
+              products={featuredProducts}
+              loading={loading}
+            />
 
             <ProductSection
               headerTitle="Featured Products"
               products={featuredProducts}
-              loading={featuredProductsLoading}
+              loading={loading}
             />
             <ProductSection
               headerTitle="Featured Products"
               products={featuredProducts}
-              loading={featuredProductsLoading}
+              loading={loading}
             />
             <BannerSection />
 
@@ -78,12 +88,12 @@ const Homepage: NextPage = ({}) => {
             <ProductSection
               headerTitle="Featured Products"
               products={featuredProducts}
-              loading={featuredProductsLoading}
+              loading={loading}
             />
             <ProductSection
               headerTitle="Featured Products"
               products={featuredProducts}
-              loading={featuredProductsLoading}
+              loading={loading}
             />
           </div>
         </div>

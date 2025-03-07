@@ -22,6 +22,7 @@ export default function SideProductCard({ product }: SideProductCardProps) {
           src={renderImageUrl(product.images[0])}
           className="object-cover h-full w-full"
           alt="Rectangle"
+          priority
         />
       </div>
       <div className="flex flex-col gap-[3px]">

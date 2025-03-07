@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { loginUser } from "@/utils/authService";
 import useUserStore from "@/store/user.store";
+import { toast } from "sonner";
+import Link from "next/link";
 
 interface LoginFormProps extends React.ComponentPropsWithoutRef<"form"> {
   onSuccess?: () => void;
@@ -38,7 +40,8 @@ export function LoginForm({ className, onSuccess, ...props }: LoginFormProps) {
       fetchUser();
       if (response) {
         onSuccess?.();
-        router.push("/"); // Redirect after login
+        router.push("/");
+        toast.success("Logged in successfully");
       }
     } catch (error: unknown) {
       setError(
@@ -91,16 +94,23 @@ export function LoginForm({ className, onSuccess, ...props }: LoginFormProps) {
 
         {error && <p className="text-sm text-red-500">{error}</p>}
 
-        <Button type="submit" className="w-full" disabled={loading}>
+        <Button
+          type="submit"
+          className="w-full bg-sheerpeace-purple-secondary text-white"
+          disabled={loading}
+        >
           {loading ? "Logging in..." : "Login"}
         </Button>
       </div>
 
       <div className="text-center text-sm">
         Don&apos;t have an account?{" "}
-        <a href="#" className="underline underline-offset-4">
+        <Link
+          href="/signup"
+          className="underline underline-offset-4 text-sheerpeace-purple-secondary"
+        >
           Sign up
-        </a>
+        </Link>
       </div>
     </form>
   );
