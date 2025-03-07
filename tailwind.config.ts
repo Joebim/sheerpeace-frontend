@@ -12,9 +12,10 @@ export default {
     extend: {
       colors: {
         sheerpeace: {
-          purple: "#B598CE",
+          purple: "#F8EBFF",
           "purple-secondary": "#8D00E8",
           blue: "#8FD7FF",
+          green: "#60B172",
           black: "#1A1A1A",
           yellow: "#FFC95C",
           grey: "#F3F5F7",

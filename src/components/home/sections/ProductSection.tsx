@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Carousel,
   CarouselContent,
@@ -22,13 +22,19 @@ interface ProductSectionProps {
 const ProductSection: React.FC<ProductSectionProps> = ({
   headerTitle,
   products,
-  loading
+  loading,
 }) => {
+  const [productLoading, setProductLoading] = useState(true);
+
+  useEffect(() => {
+    setProductLoading(loading);
+  }, [loading]);
+
   return (
     <div className="">
       <div className="flex flex-col gap-[20px]">
         <div className="flex flex-row justify-between items-center">
-          <h2 className="text-xl sm:text-[18px]  font-bold text-center self-start">
+          <h2 className="text-[13px] sm:text-[18px]  font-bold text-center self-start">
             {headerTitle}
           </h2>
           <div className="flex flex-row gap-[10px] items-center">
@@ -42,11 +48,11 @@ const ProductSection: React.FC<ProductSectionProps> = ({
         <div className="w-full">
           <Carousel className="w-full max-w-full">
             <CarouselContent className="-ml-1">
-              {loading
+              {productLoading
                 ? Array.from({ length: 5 }).map((_, index) => (
                     <CarouselItem
                       key={index}
-                      className="basis-1/2 md:basis-1/4 lg:basis-1/5"
+                      className="basis-1/3 md:basis-1/4 lg:basis-1/5"
                     >
                       <ProductCardSkeleton />
                     </CarouselItem>
@@ -54,48 +60,48 @@ const ProductSection: React.FC<ProductSectionProps> = ({
                 : products?.map((product) => (
                     <CarouselItem
                       key={product.id}
-                      className="basis-1/2 md:basis-1/4 lg:basis-1/5"
+                      className="basis-1/3 md:basis-1/4 lg:basis-1/5"
                     >
                       <ProductCard product={product} />
                     </CarouselItem>
                   ))}
             </CarouselContent>
             <CarouselPrevious className="absolute top-1/2 left-[20px] transform -translate-y-1/2">
-                    <button className="bg-white p-2 rounded-full">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 19l-7-7 7-7"
-                        />
-                      </svg>
-                    </button>
-                  </CarouselPrevious>
-                  <CarouselNext className="absolute top-1/2 right-[20px] transform -translate-y-1/2">
-                    <button className="bg-white p-2 rounded-full">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5l7 7-7 7"
-                        />
-                      </svg>
-                    </button>
-                  </CarouselNext>
+              <button className="bg-white p-2 rounded-full">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              </button>
+            </CarouselPrevious>
+            <CarouselNext className="absolute top-1/2 right-[20px] transform -translate-y-1/2">
+              <button className="bg-white p-2 rounded-full">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
+            </CarouselNext>
           </Carousel>
         </div>
       </div>

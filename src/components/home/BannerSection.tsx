@@ -7,13 +7,11 @@ import React from "react";
 export default function BannerSection() {
   const uploadId = "d7c566f0-4f2b-4bef-9e4d-0122da1bb26d";
 
-  const {
-    data: bannerImage,
-    // error,
-    loading,
-  } = useFetch<Upload>(`/uploads/${uploadId}`);
+  const { data: bannerImage, loading } = useFetch<Upload>(
+    `/uploads/${uploadId}`
+  );
   return (
-    <div className="w-full h-[200px] rounded-[10px] overflow-hidden">
+    <div className="w-full h-[95px] sm:h-[200px] rounded-[10px] overflow-hidden">
       {loading ? (
         <div className="h-full w-full animate-pulse bg-gray-300"></div>
       ) : (
@@ -25,6 +23,7 @@ export default function BannerSection() {
           )}
           className="object-cover h-full w-full"
           alt="Rectangle"
+          priority
         />
       )}
     </div>

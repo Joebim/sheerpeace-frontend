@@ -22,10 +22,14 @@ export default function FeaturedCarousel() {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const plugin = React.useRef(
     Autoplay({ delay: 2000, stopOnInteraction: true })
   );
+
+  const { data: featuredOffering, loading: featuredOfferingLoading } =
+    useFetch<FeaturedOffering[]>("/featured");
 
   useEffect(() => {
     if (!api) {
@@ -38,37 +42,36 @@ export default function FeaturedCarousel() {
     api.on("select", () => {
       setCurrent(api.selectedScrollSnap() + 1);
     });
+    
   }, [api]);
 
-  const {
-    data: featuredOffering,
-    loading,
-    error,
-  } = useFetch<FeaturedOffering[]>("/featured");
+  useEffect(() => {
+    setLoading(featuredOfferingLoading);
+  }, [featuredOfferingLoading]);
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       {loading ? (
-        <div className="h-full w-full bg-gray-300 animate-pulse"></div>
+        <div className="w-full bg-gray-200 animate-pulse rounded-[15px] sm:h-[403px] h-[200px]"></div>
       ) : (
         <Carousel
           setApi={setApi}
           plugins={[plugin.current]}
-          className="w-full max-w-[40rem]"
+          className="w-full max-w-full relative"
           onMouseEnter={plugin.current.stop}
           onMouseLeave={plugin.current.reset}
         >
-          <div className="w-full z-50 absolute bottom-[30px] flex justify-center">
+          <div className="w-full z-[2] absolute bottom-[30px] flex justify-center">
             <div className="flex flex-row gap-[8px]">
-              {Array?.from({ length: count }).map((_, index) => (
+              {Array.from({ length: count }).map((_, index) => (
                 <button
                   key={index}
                   onClick={() => api?.scrollTo(index)}
                   className={`${
                     current === index + 1
-                      ? "bg-sheerpeace-purple-secondary"
-                      : "bg-gray-200"
-                  } w-3 h-3 rounded-full`}
+                      ? "bg-sheerpeace-purple-secondary w-8"
+                      : "bg-gray-400 w-3"
+                  } h-3 rounded-full duration-300`}
                 ></button>
               ))}
             </div>
@@ -78,14 +81,15 @@ export default function FeaturedCarousel() {
             {featuredOffering?.map((featured, index) => (
               <CarouselItem key={index}>
                 <div className="">
-                  <Card className="overflow-hidden">
-                    <CardContent className="flex aspect-square items-center justify-center p-0 h-[350px] w-full overflow-hidden">
+                  <Card className="overflow-hidden rounded-[15px]">
+                    <CardContent className="flex aspect-square items-center justify-center p-0 sm:h-[403px] h-[200px] w-full overflow-hidden">
                       <Image
                         src={renderImageUrl(featured.image_url)}
                         alt={featured.title}
                         height={500}
                         width={500}
                         className="object-cover w-full h-full"
+                        priority
                       />
                     </CardContent>
                   </Card>
@@ -93,42 +97,12 @@ export default function FeaturedCarousel() {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious className="absolute top-1/2 left-[30px] transform -translate-y-1/2">
-            <button className="bg-white p-2 rounded-full">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-          </CarouselPrevious>
-          <CarouselNext className="absolute top-1/2 right-[30px] transform -translate-y-1/2">
-            <button className="bg-white p-2 rounded-full">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
-          </CarouselNext>
+          {!loading ? (
+            <>
+              <CarouselPrevious className="absolute top-1/2 left-[30px] transform -translate-y-1/2" />
+              <CarouselNext className="absolute top-1/2 right-[30px] transform -translate-y-1/2" />
+            </>
+          ) : null}
         </Carousel>
       )}
     </div>

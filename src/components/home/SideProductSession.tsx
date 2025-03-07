@@ -8,19 +8,23 @@ import {
 } from "@/components/ui/carousel";
 import { type CarouselApi } from "@/components/ui/carousel";
 import SideProductCard from "./SideProductCard";
+import SideProductSkeleton from "./SideProductSkeleton";
 
 interface SideProductSessionProps {
   title: string;
   products: Product[] | undefined;
+  loading: boolean;
 }
 
 export default function SideProductSession({
   title,
   products,
+  loading,
 }: SideProductSessionProps) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
+  const [sideProductLoading, setSideProductLoading] = useState(true);
 
   useEffect(() => {
     if (!api) {
@@ -42,10 +46,14 @@ export default function SideProductSession({
 
   const chunkedProducts = products ? chunkArray(products, 4) : [];
 
+  useEffect(() => {
+    setSideProductLoading(loading);
+  }, [loading]);
+
   return (
-    <div className="flex flex-col gap-[10px] w-full">
-      <div className="flex flex-row justify-between items-center">
-        <span className="text-[11px] font-bold">
+    <div className="flex flex-col gap-[15px] w-full">
+      <div className="flex flex-row justify-between items-center border-b  pb-[8px]">
+        <span className="text-[13px] font-bold">
           {title.toLocaleUpperCase()}
         </span>
 
@@ -64,24 +72,38 @@ export default function SideProductSession({
         </div>
       </div>
 
-      <Carousel 
-        setApi={setApi} 
-        className="w-full max-w-[200px]"
-      >
+      <Carousel setApi={setApi} className="w-full max-w-[200px]">
         <CarouselContent>
-          {chunkedProducts.map((productChunk, index) => (
-            <CarouselItem key={index} className="basis-1/1">
+          {sideProductLoading ? (
+            <CarouselItem className="basis-1/1">
               <div className="flex flex-col gap-4 w-[200px]">
-                {productChunk.map((product, productIndex) => (
-                  <Card key={productIndex} className="shadow-none border-none">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <Card key={index} className="shadow-none border-none">
                     <CardContent className="flex items-center justify-center p-0">
-                      <SideProductCard product={product} />
+                      <SideProductSkeleton />
                     </CardContent>
                   </Card>
                 ))}
               </div>
             </CarouselItem>
-          ))}
+          ) : (
+            chunkedProducts.map((productChunk, index) => (
+              <CarouselItem key={index} className="basis-1/1">
+                <div className="flex flex-col gap-4 w-[200px]">
+                  {productChunk.map((product, productIndex) => (
+                    <Card
+                      key={productIndex}
+                      className="shadow-none border-none"
+                    >
+                      <CardContent className="flex items-center justify-center p-0">
+                        <SideProductCard product={product} />
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CarouselItem>
+            ))
+          )}
         </CarouselContent>
       </Carousel>
     </div>

@@ -20,6 +20,7 @@ import {
 import useUserStore from "@/store/user.store";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface UserDropdownMenuProps {
   children: React.ReactNode;
@@ -54,7 +55,8 @@ export function UserDropdownMenu({ children }: UserDropdownMenuProps) {
 
   const handleLogout = () => {
     logout();
-    router.push("/shoppers");
+    router.push("/");
+    toast.success("User Logged Out");
   };
 
   return (
@@ -95,7 +97,7 @@ export function UserDropdownMenu({ children }: UserDropdownMenuProps) {
               <span className="text-red-500">Log out</span>
             </DropdownMenuItem>
           ) : (
-            <Link href="/auth" passHref>
+            <Link href="/login" passHref>
               <DropdownMenuItem>
                 <Button className="flex flex-row gap-[10px] bg-sheerpeace-purple-secondary hover:bg-sheerpeace-black text-white w-full py-[2px]">
                   <LogIn />

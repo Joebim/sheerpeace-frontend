@@ -28,9 +28,9 @@ const Like: React.FC<LikeProps> = ({ productId }) => {
   };
 
   return (
-    <div onClick={handleLike} className="cursor-pointer">
+    <div onClick={handleLike} className="cursor-pointer h-full w-full">
       <Heart
-        className={`stroke-indigo-600 stroke-[1px] ${
+        className={`stroke-indigo-600 stroke-[1px] h-full w-full ${
           liked ? "fill-indigo-600" : ""
         }`}
       />

@@ -3,7 +3,7 @@ const ProductCardSkeleton: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-[20px]">
-      <div className="w-full h-[250px] animate-pulse rounded-[10px] bg-gray-200">
+      <div className="w-full h-[120px] sm:h-[250px] animate-pulse rounded-[10px] bg-gray-200">
 
 
       </div>

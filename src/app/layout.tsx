@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/nav/Navbar";
+import UserNav from "@/components/nav/UserNav";
 import ShowNav from "@/components/nav/ShowNav";
 import AnnounceBar from "@/components/AnnounceBar";
+import Footer from "@/components/footer/Footer";
+import ShowFooter from "@/components/footer/ShowFooter";
+import { Toaster } from "sonner";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -21,14 +24,21 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const restrictedPathsToNav = ["/signup", "/login"];
+  const restrictedPathsToFooter = ["/signup", "/login"];
+
   return (
     <html lang="en">
       <body className={`${poppins.className} bg-white`}>
-        <AnnounceBar />
-        <ShowNav restrictedPaths={["/signup", "/login"]}>
-          <Navbar />
+        <ShowNav restrictedPaths={restrictedPathsToNav}>
+          <AnnounceBar />
+          <UserNav />
         </ShowNav>
         {children}
+        <ShowFooter restrictedPaths={restrictedPathsToFooter}>
+          <Footer />
+        </ShowFooter>
+        <Toaster />
       </body>
     </html>
   );

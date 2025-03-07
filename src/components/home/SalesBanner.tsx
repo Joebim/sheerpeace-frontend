@@ -32,11 +32,12 @@ const SalesBanner: React.FC<SalesBannerProps> = ({
           src={renderImageUrl(imageUrl)}
           alt="Sale Offer"
           className="w-full h-full object-cover"
+          priority
         />
       </div>
 
       {/* Text Section */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center p-11 text-center md:text-left">
+      <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-11 text-center md:text-left">
         <p className="text-sheerpeace-purple-secondary  font-bold uppercase">
           {offerText} <span className="">{percentageOff}</span>
         </p>
