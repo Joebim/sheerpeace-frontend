@@ -6,9 +6,14 @@ export type Color = {
 };
 
 export type Size = {
-  id: string;
-  name: string;
+  label: string;
+  gender: string;
+  chest: number;
+  waist: number;
+  hips: number;
+  description: string;
   created_at: string;
+  id: string;
 };
 
 export type Category = {

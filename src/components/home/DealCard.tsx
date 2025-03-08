@@ -14,7 +14,7 @@ export default function DealCard({ product }: DealCardProps) {
   const { formatPrice } = usePrice();
 
   return (
-    <Link href={`/product/${product.id}`}>
+    <Link href={`/products/${product.id}`}>
       <div className="flex flex-row">
         <div className="flex-1 rounded-[10px] overflow-hidden max-h-[220px]">
           <Image

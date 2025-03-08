@@ -1,8 +1,9 @@
 interface RatingProps {
     rating: number;
+    className?: string;
 }
 
-const Rating: React.FC<RatingProps> = ({ rating }) => {
+const Rating: React.FC<RatingProps> = ({ rating, className }) => {
     const roundedRating = Math.round(rating);
     const totalStars = 5;
 
@@ -11,7 +12,7 @@ const Rating: React.FC<RatingProps> = ({ rating }) => {
             {Array.from({ length: totalStars }).map((_, index) => (
                 <svg
                     key={index}
-                    className="scale-90"
+                    className={className}
                     width="16"
                     height="15"
                     viewBox="0 0 16 15"

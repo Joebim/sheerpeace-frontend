@@ -40,7 +40,9 @@ import useFetch from "@/hooks/useFetch";
 import { Category } from "@/types";
 import UserSideBar from "./UserSideBar";
 
-const ALLOWED_SEARCH_ROUTES = ["/"];
+import { match } from "path-to-regexp"; // Install with: npm install path-to-regexp
+
+const ALLOWED_SEARCH_ROUTES = ["/", "/products/:id"];
 
 const UserNav: React.FC = () => {
   const { cart } = useCartStore();
@@ -48,13 +50,20 @@ const UserNav: React.FC = () => {
   const pathname = usePathname();
   const { notifications } = useNotificationStore();
 
-  const showSearch = ALLOWED_SEARCH_ROUTES.includes(pathname);
+const isAllowedRoute = (pathname: string) => {
+  return ALLOWED_SEARCH_ROUTES.some((route) => {
+    const matchRoute = match(route, { decode: decodeURIComponent });
+    return matchRoute(pathname);
+  });
+};
+
+const showSearch = isAllowedRoute(pathname);
 
   const { data: categories, loading } = useFetch<Category[]>("/categories");
 
   return (
     <>
-      <nav className="bg-sheerpeace-purple text-[13px] py-[10px] gap-[15px] w-full text-sheerpeace-purple-secondary px-6 sm:px-12 flex flex-col items-center z-[1000] duration-300">
+      <nav className="sticky top-0 bg-sheerpeace-purple text-[13px] py-[10px] gap-[15px] w-full text-sheerpeace-purple-secondary px-6 sm:px-12 flex flex-col items-center z-[40] duration-300">
         <div className="w-full">
           <div className="flex w-full items-center justify-between relative">
             <div>
@@ -71,7 +80,7 @@ const UserNav: React.FC = () => {
               <input
                 type="text"
                 placeholder="Search"
-                className="bg-transparent outline-none text-sheerpeace-black"
+                className="bg-transparent outline-none text-sheerpeace-black w-full"
               />
             </div>
             {/* Right Section - Actions */}
@@ -272,7 +281,7 @@ const UserNav: React.FC = () => {
               <input
                 type="text"
                 placeholder="Search"
-                className="bg-transparent outline-none text-sheerpeace-black"
+                className="bg-transparent outline-none text-sheerpeace-black w-full"
               />
             </div>
           )}
