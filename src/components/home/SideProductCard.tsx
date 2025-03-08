@@ -26,7 +26,7 @@ export default function SideProductCard({ product }: SideProductCardProps) {
         />
       </div>
       <div className="flex flex-col gap-[3px]">
-          <Rating rating={product.average_rating} />
+          <Rating rating={product.average_rating} className="scale-90"/>
         <div className="flex flex-row gap-[10px] items-center">
           <p className="text-[12px] line-through text-gray-400">
             {formatPrice(product?.price)}

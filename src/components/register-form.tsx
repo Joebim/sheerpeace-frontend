@@ -60,7 +60,7 @@ export function RegisterForm({
       const response = await registerUser(data);
       if (response) {
         onSuccess?.();
-        router.push("/login");
+        router.push("/auth/login");
         toast.success("Account created successfully. Please login to continue");
       }
     } catch (error: unknown) {
@@ -166,7 +166,7 @@ export function RegisterForm({
       <div className="text-center text-sm">
         Already have an account?{" "}
         <Link
-          href="/login"
+          href="auth/login"
           className="underline underline-offset-4 text-sheerpeace-purple-secondary"
         >
           Login

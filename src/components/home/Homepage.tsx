@@ -3,15 +3,11 @@
 
 import { NextPage } from "next";
 import FeaturedCarousel from "./FeaturedCarousel";
-import { InfiniteCategoriesSlider } from "./sections/InfiniteCategoriesSlider";
-import FeaturedCategory from "./sections/FeaturedCategory";
 import ProductSection from "./sections/ProductSection";
 import useFetch from "@/hooks/useFetch";
 import { Product } from "@/types"; // Adjust the import path as necessary
-import { CategorySideCard } from "./CategorySideCard";
 import OffersSideCard from "./OffersSideCard";
 import BenefitSection from "./BenefitSection";
-import AdvertTab from "./CouponTab";
 import { Gift } from "lucide-react";
 import CouponTab from "./CouponTab";
 import DealSession from "./DealSession";

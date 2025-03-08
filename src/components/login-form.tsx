@@ -106,7 +106,7 @@ export function LoginForm({ className, onSuccess, ...props }: LoginFormProps) {
       <div className="text-center text-sm">
         Don&apos;t have an account?{" "}
         <Link
-          href="/signup"
+          href="/auth/signup"
           className="underline underline-offset-4 text-sheerpeace-purple-secondary"
         >
           Sign up

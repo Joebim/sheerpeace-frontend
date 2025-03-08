@@ -24,8 +24,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const restrictedPathsToNav = ["/signup", "/login"];
-  const restrictedPathsToFooter = ["/signup", "/login"];
+  const restrictedPathsToNav = ["/auth/signup", "auth/login"];
+  const restrictedPathsToFooter = ["/auth/signup", "auth/login"];
 
   return (
     <html lang="en">
