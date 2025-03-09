@@ -2,6 +2,7 @@ import Image from "next/image";
 import React from "react";
 import { Blog } from "@/types";
 import Link from "next/link";
+import { renderImageUrl } from "@/hooks/useRenderImageUrl";
 
 interface BlogCardProps {
   blog: Blog;
@@ -17,7 +18,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
           height={800}
           width={800}
           className="w-full h-full object-cover rounded-[10px] "
-          src={blog.imageUrl}
+          src={renderImageUrl(blog.imageUrl)}
           alt={blog.title}
         />
       </div>
@@ -34,7 +35,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
           <Image
             height={800}
             width={800}
-            src={blog.authorImage}
+            src={renderImageUrl(blog.authorImage)}
             alt={blog.authorName}
             className="w-8 h-8 rounded-full mr-2"
           />
