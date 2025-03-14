@@ -1,8 +1,8 @@
 import { LoginForm } from "@/components/login-form";
 import Image from "next/image";
 import { renderImageUrl } from "@/hooks/useRenderImageUrl";
-import SheerpeaceWordmark from "../../../public/sheerpeace-word-mark.svg";
-import SheerpeaceLogo from "../../../public/sheerpeace-logo.svg";
+import SheerpeaceWordmark from "../../../../public/sheerpeace-word-mark.svg";
+import SheerpeaceLogo from "../../../../public/sheerpeace-logo.svg";
 
 export default function LoginPage() {
   return (
