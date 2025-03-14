@@ -1,7 +1,7 @@
 import { RegisterForm } from "@/components/register-form";
 import Image from "next/image";
-import SheerpeaceWordmark from "../../../public/sheerpeace-word-mark.svg";
-import SheerpeaceLogo from "../../../public/sheerpeace-logo.svg";
+import SheerpeaceWordmark from "../../../../public/sheerpeace-word-mark.svg";
+import SheerpeaceLogo from "../../../../public/sheerpeace-logo.svg";
 import { renderImageUrl } from "@/hooks/useRenderImageUrl";
 
 export default function SignupPage() {
