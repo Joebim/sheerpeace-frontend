@@ -16,12 +16,12 @@ export default function AnnounceBar() {
       <div className="absolute right-[20px] text-white cursor-pointer" onClick={() => setIsVisible(false)}>
         <X className="w-[15px]"/>
       </div>
-      <div className="flex flex-row items-center gap-[20px]">
+      <div className="flex flex-row items-center gap-[10px] sm:gap-[20px]">
         <TicketPercent />
-        <span className="">Get 10% off on your first purchase</span>
+        <span className="text-[10px] sm:text-[12px]">Get 10% off on your first purchase</span>
         <Link href="">
           <div className="flex border-b border-white flex-row gap-[5px] items-center">
-            <span>Shop Now</span>
+            <span className="text-[10px] sm:text-[12px]">Shop Now</span>
             <ArrowRight className="w-[12px]" />
           </div>
         </Link>

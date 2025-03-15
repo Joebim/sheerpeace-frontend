@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import { Product } from "@/types";
 
 interface ProductPropertiesProps {
@@ -14,9 +13,10 @@ export default function ProductProperties({ product }: ProductPropertiesProps) {
   const [activeTab, setActiveTab] = useState("reviews");
 
   // Section refs for observing
-  const sectionRefs: {
-    [key in SectionKeys]: React.RefObject<HTMLDivElement | null>;
-  } = {
+  const sectionRefs: Record<
+    "reviews" | "specifications" | "description" | "store" | "qa",
+    React.RefObject<HTMLDivElement | null>
+  > = {
     reviews: useRef<HTMLDivElement>(null),
     specifications: useRef<HTMLDivElement>(null),
     description: useRef<HTMLDivElement>(null),
@@ -24,7 +24,6 @@ export default function ProductProperties({ product }: ProductPropertiesProps) {
     qa: useRef<HTMLDivElement>(null),
   };
 
-  // Observe sections and update active tab
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -43,15 +42,7 @@ export default function ProductProperties({ product }: ProductPropertiesProps) {
     return () => observer.disconnect();
   }, []);
 
-  type SectionKeys =
-    | "reviews"
-    | "specifications"
-    | "description"
-    | "store"
-    | "qa";
-
-  // Smooth scroll to section when clicking a tab
-  const scrollToSection = (section: SectionKeys) => {
+  const scrollToSection = (section: keyof typeof sectionRefs) => {
     sectionRefs[section]?.current?.scrollIntoView({
       behavior: "smooth",
       block: "start",
@@ -59,18 +50,18 @@ export default function ProductProperties({ product }: ProductPropertiesProps) {
   };
 
   return (
-    <div className="relative mt-12">
+    <div className="relative mt-12 flex flex-col gap-[20px] ">
       {/* Sticky Tabs Header */}
-      <div className="hidden sm:block sticky top-[113px] z-50 bg-white shadow-md border-b border-gray-200 py-2">
+      <div className="hidden sm:block sticky top-[113px] z-10 ">
         <Tabs>
-          <TabsList className="flex justify-start space-x-4 px-4">
+          <TabsList className="flex justify-start space-x-4 px-4 bg-sheerpeace-purple-secondary rounded-full shadow-md">
             {Object.keys(sectionRefs).map((key) => (
               <TabsTrigger
                 key={key}
                 value={key}
-                onClick={() => scrollToSection(key as SectionKeys)}
+                onClick={() => scrollToSection(key as keyof typeof sectionRefs)}
                 className={
-                  activeTab === key ? "font-bold text-black" : "text-gray-500"
+                  activeTab === key ? "font-bold text-white" : "text-white"
                 }
               >
                 {key.charAt(0).toUpperCase() + key.slice(1)}
@@ -87,27 +78,27 @@ export default function ProductProperties({ product }: ProductPropertiesProps) {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">
-                Customer Reviews ({product.total_reviews || 279})
+                Customer Reviews ({product.total_reviews})
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="text-[14px]">
               <div className="flex items-center space-x-4">
-                <p className="text-xl font-bold">4.6</p>
+                <p className="text-xl font-bold">{product.average_rating}</p>
                 <div className="flex space-x-1">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <span
                       key={i}
-                      className={`text-yellow-500 ${
-                        i < 4 ? "opacity-100" : "opacity-50"
+                      className={`text-yellow-500 text-[20px] ${
+                        i < Math.round(product.average_rating)
+                          ? "opacity-100"
+                          : "opacity-50"
                       }`}
                     >
                       ★
                     </span>
                   ))}
                 </div>
-                <p className="text-gray-500">
-                  {product.total_reviews || 278} ratings
-                </p>
+                <p className="text-gray-500">{product.total_reviews} ratings</p>
               </div>
               <p className="text-gray-500">All from verified purchases</p>
             </CardContent>
@@ -120,27 +111,20 @@ export default function ProductProperties({ product }: ProductPropertiesProps) {
             <CardHeader>
               <CardTitle className="text-lg">Specifications</CardTitle>
             </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 text-gray-700">
-                <li>
-                  <strong>High Concerned Chemical:</strong> None
-                </li>
-                <li>
-                  <strong>Diaphragm:</strong> S-Mall
-                </li>
-                <li>
-                  <strong>Polar Patterns:</strong> Omnidirectional
-                </li>
-                <li>
-                  <strong>Package:</strong> Yes
-                </li>
-                <li>
-                  <strong>Communication:</strong> Wireless
-                </li>
-                <li>
-                  <strong>Set Type:</strong> Transmitter Sets
-                </li>
-              </ul>
+            <CardContent className="text-[14px]">
+              {product.productSpecifications.length > 0 ? (
+                <ul className="space-y-2 text-gray-700">
+                  {Object.entries(product.productSpecifications[0].specifications).map(
+                    ([key, value]) => (
+                      <li key={key}>
+                        <strong>{key}:</strong> {String(value)}
+                      </li>
+                    )
+                  )}
+                </ul>
+              ) : (
+                <p className="text-gray-500">No specifications available.</p>
+              )}
             </CardContent>
           </Card>
         </section>
@@ -151,19 +135,17 @@ export default function ProductProperties({ product }: ProductPropertiesProps) {
             <CardHeader>
               <CardTitle className="text-lg">Description</CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-gray-700">
-                {product.description ||
-                  "Wireless Lavalier Microphone for iPhone, Android, Laptop, etc."}
-              </p>
-              <ul className="list-disc pl-5 space-y-2 mt-4 text-gray-700">
-                <li>9 ms ultra-low latency, 20m barrier-free reception.</li>
-                <li>No app needed, plug-and-play connection.</li>
-                <li>360° full-pointing pickup for clear audio.</li>
-                <li>
-                  Compatible with mobile phones, tablets, cameras, and laptops.
-                </li>
-              </ul>
+            <CardContent className="text-[14px]">
+              {product.productDescriptions.length > 0 ? (
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: product.productDescriptions[0].description_html,
+                  }}
+                  className="text-gray-700"
+                />
+              ) : (
+                <p className="text-gray-500">No description available.</p>
+              )}
             </CardContent>
           </Card>
         </section>
@@ -174,18 +156,22 @@ export default function ProductProperties({ product }: ProductPropertiesProps) {
             <CardHeader>
               <CardTitle className="text-lg">Store Details</CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-gray-700">
-                <strong>Store Name:</strong> {product.brand?.name}
-              </p>
-              <p className="text-gray-700">
-                <strong>Average Rating:</strong> ⭐{" "}
-                {product.brand?.averageRating}
-              </p>
-              <p className="text-gray-700">
-                {product.brand?.description ||
-                  "This brand offers high-quality tech accessories and gadgets."}
-              </p>
+            <CardContent className="text-[14px]">
+              {product.brand ? (
+                <>
+                  <p className="text-gray-700">
+                    <strong>Store Name:</strong> {product.brand.name}
+                  </p>
+                  <p className="text-gray-700">
+                    <strong>Average Rating:</strong> ⭐ {product.brand.averageRating}
+                  </p>
+                  <p className="text-gray-700">
+                    {product.brand.description || "This brand offers high-quality fashion items."}
+                  </p>
+                </>
+              ) : (
+                <p className="text-gray-500">No brand details available.</p>
+              )}
             </CardContent>
           </Card>
         </section>
@@ -198,26 +184,29 @@ export default function ProductProperties({ product }: ProductPropertiesProps) {
                 Buyer Questions & Answers
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {/* Replace with actual Q&A list */}
-                <div className="border-t pt-3">
-                  <p className="text-gray-800 font-semibold">
-                    Does this work with iPhone 16?
-                  </p>
-                  <p className="text-gray-600">
-                    Yes, it supports iPhone 16 and newer models.
-                  </p>
+            <CardContent className="text-[14px]">
+              {product.questions.length > 0 ? (
+                <div className="space-y-4">
+                  {product.questions.map((q) => (
+                    <div key={q.id} className="border-t pt-3">
+                      <p className="text-gray-800 font-semibold">
+                        {q.question}
+                      </p>
+                      {q.answers.length > 0 ? (
+                        q.answers.map((a) => (
+                          <p key={a.id} className="text-gray-600">
+                            {a.answer}
+                          </p>
+                        ))
+                      ) : (
+                        <p className="text-gray-500">No answers yet.</p>
+                      )}
+                    </div>
+                  ))}
                 </div>
-                <div className="border-t pt-3">
-                  <p className="text-gray-800 font-semibold">
-                    Can I use this for live streaming?
-                  </p>
-                  <p className="text-gray-600">
-                    Yes, it has ultra-low latency for real-time audio.
-                  </p>
-                </div>
-              </div>
+              ) : (
+                <p className="text-gray-500">No questions available.</p>
+              )}
             </CardContent>
           </Card>
         </section>

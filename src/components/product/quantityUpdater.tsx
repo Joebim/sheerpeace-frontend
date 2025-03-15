@@ -9,14 +9,14 @@ interface Props {
 }
 
 const QuantityUpdater: NextPage<Props> = ({ cartItem }) => {
-  const updateQuantity = useCartStore((state) => state.updateQuantity);
+  const {updateQuantity }= useCartStore();
 
   return (
     <div className="flex flex-row items-center gap-[10px]">
       <div
         className="text-[20px] cursor-pointer bg-primary-100 px-2 rounded-sm"
         onClick={() =>
-          updateQuantity(cartItem.product_id, cartItem.quantity - 1)
+          cartItem.id && updateQuantity(cartItem.id, cartItem.quantity - 1)
         }
       >
         <Minus className="w-[12px] text-light" />
@@ -26,13 +26,13 @@ const QuantityUpdater: NextPage<Props> = ({ cartItem }) => {
         value={cartItem.quantity}
         className="border-[1px] outline-none w-[30px] text-center text-[10px]"
         onChange={(e) =>
-          updateQuantity(cartItem.product_id, Number(e.target.value))
+          cartItem.id && updateQuantity(cartItem.id, Number(e.target.value))
         }
       />
       <div
         className="text-[20px] cursor-pointer bg-primary-100 px-2 rounded-sm"
         onClick={() =>
-          updateQuantity(cartItem.product_id, cartItem.quantity + 1)
+          cartItem.id && updateQuantity(cartItem.id, cartItem.quantity + 1)
         }
       >
         <Plus className="w-[12px] text-light" />

@@ -63,7 +63,7 @@ const showSearch = isAllowedRoute(pathname);
 
   return (
     <>
-      <nav className="sticky top-0 bg-sheerpeace-purple text-[13px] py-[10px] gap-[15px] w-full text-sheerpeace-purple-secondary px-6 sm:px-12 flex flex-col items-center z-[51] duration-300">
+      <nav className="sticky top-0 bg-sheerpeace-purple text-[13px] py-[10px] gap-[15px] w-full text-sheerpeace-purple-secondary px-6 sm:px-12 flex flex-col items-center z-[40] duration-300">
         <div className="w-full">
           <div className="flex w-full items-center justify-between relative">
             <div>
@@ -99,7 +99,7 @@ const showSearch = isAllowedRoute(pathname);
 
               {/* Shopping Cart */}
               <div className="relative">
-                <Link href="/shoppers/cart">
+                <Link href="/cart">
                   <ShoppingBag className="cursor-pointer text-sheerpeace-green hover:text-black" />
                   {(cart?.items?.length ?? 0) > 0 && (
                     <span className="absolute top-0 right-0 bg-purple-600 rounded-full h-[10px] w-[10px]"></span>

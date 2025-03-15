@@ -28,11 +28,12 @@ import { Separator } from "@/components/ui/separator";
 import AmountSold from "./AmountSold";
 import Rating from "@/components/home/Rating";
 import { usePrice } from "@/utils/usePrice";
-import useUserStore from "@/store/user.store";
 import ProductListSection from "@/components/product/ProductListSection";
 import ProductProperties from "@/components/product/ProductProperties";
 import ProductSection from "@/components/home/sections/ProductSection";
 import ViewProductSkeleton from "./ViewProductSkeleton";
+import BrandSideCard from "./BrandSideCard";
+import { useCartStore } from "@/store/cart.store";
 
 interface ViewProductProps {
   productId: string;
@@ -47,7 +48,7 @@ export default function ViewProduct({ productId }: ViewProductProps) {
 
   const { data: products, loading } = useFetch<Product[]>(`/products`);
 
-  const { user } = useUserStore();
+  const { addItem } = useCartStore();
 
   const { formatPrice } = usePrice();
 
@@ -65,7 +66,7 @@ export default function ViewProduct({ productId }: ViewProductProps) {
   }, [api]);
 
   const { data: product, loading: isLoading } = useFetch<Product>(
-    `/products/${productId}`
+    productId ? `/products/${productId}` : ""
   );
   const pathname = usePathname();
 
@@ -90,6 +91,17 @@ export default function ViewProduct({ productId }: ViewProductProps) {
     ...generateBreadcrumbs(product?.name || ""),
   ];
 
+  const handleAddToCart = (product: Product) => {
+    addItem({
+      product_id: product.id,
+      product: product,
+      quantity: 1,
+      selected_sizes: product?.sizes || [],
+      selected_variants: product?.variants || [],
+      selected_colors: product?.colors || [],
+    });
+  };
+
   useEffect(() => {
     setProductLoading(isLoading);
   }, [isLoading]);
@@ -112,8 +124,8 @@ export default function ViewProduct({ productId }: ViewProductProps) {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="relative flex flex-col sm:flex-row gap-8 mt-4">
-        <div className="flex flex-col gap-[30px]">
+      <div className="relative flex flex-col sm:flex-row gap-8 mt-4 pb-[40px]">
+        <div className="flex flex-col gap-[30px] flex-[8]">
           {productLoading ? (
             <ViewProductSkeleton />
           ) : (
@@ -130,13 +142,15 @@ export default function ViewProduct({ productId }: ViewProductProps) {
                           <div className="p-1">
                             <Card className="overflow-hidden">
                               <CardContent className="flex h-[300px] sm:h-[400px] items-center justify-center p-0">
-                                <Image
-                                  src={renderImageUrl(image)}
-                                  width={500}
-                                  height={500}
-                                  alt={product?.name}
-                                  className="w-full h-full object-cover"
-                                />
+                                {image && (
+                                  <Image
+                                    src={renderImageUrl(image)}
+                                    width={500}
+                                    height={500}
+                                    alt={product?.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                )}
                               </CardContent>
                             </Card>
                           </div>
@@ -261,9 +275,14 @@ export default function ViewProduct({ productId }: ViewProductProps) {
                   <Separator />
 
                   {/* Add to Cart */}
-                  <Button className="w-full h-[50px] rounded-full bg-sheerpeace-purple-secondary">
-                    Add to Cart
-                  </Button>
+                  {product && (
+                    <Button
+                      className="w-full h-[50px] rounded-full bg-sheerpeace-purple-secondary"
+                      onClick={() => handleAddToCart(product)}
+                    >
+                      Add to Cart
+                    </Button>
+                  )}
                 </div>
               </div>
             </>
@@ -288,45 +307,8 @@ export default function ViewProduct({ productId }: ViewProductProps) {
           />
         </div>
 
-        <div className="flex-[2] relative w-full sm:w-[400px] h-auto">
-          <div className="sticky top-20 bg-white shadow-lg rounded-2xl p-6">
-            {/* Seller Details */}
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold text-gray-800">
-                Seller Details
-              </h2>
-              <p className="text-gray-600">
-                Seller:{" "}
-                <span className="font-medium">{product?.brand?.name}</span>
-              </p>
-              <p className="text-gray-600">
-                Rating: ⭐ {product?.brand?.averageRating}
-              </p>
-            </div>
-
-            {/* Shipping Details */}
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold text-gray-800">Ship To</h2>
-              <p className="text-gray-600">
-                Location: <span className="font-medium">{user?.country}</span>
-              </p>
-            </div>
-
-            {/* Buy Now Button */}
-            <Button className="w-full h-[50px] rounded-full bg-sheerpeace-purple-secondary text-white text-lg font-medium transition-transform hover:scale-105">
-              Buy Now
-            </Button>
-
-            {/* Share & Like Buttons */}
-            <div className="flex justify-between gap-4 mt-4">
-              <Button className="w-1/2 h-[50px] rounded-full bg-blue-500 text-white text-lg font-medium transition-transform hover:scale-105">
-                Share
-              </Button>
-              <Button className="w-1/2 h-[50px] rounded-full bg-red-500 text-white text-lg font-medium transition-transform hover:scale-105">
-                Like
-              </Button>
-            </div>
-          </div>
+        <div className="flex-[3] relative w-full sm:w-[400px] h-auto">
+          <BrandSideCard product={product} />
         </div>
       </div>
     </div>
