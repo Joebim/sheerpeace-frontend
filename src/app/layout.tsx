@@ -7,6 +7,7 @@ import AnnounceBar from "@/components/AnnounceBar";
 import Footer from "@/components/footer/Footer";
 import ShowFooter from "@/components/footer/ShowFooter";
 import { Toaster } from "sonner";
+import GlobalProvider from "@/context/GlobalProvider";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -34,7 +35,7 @@ export default function RootLayout({
           <AnnounceBar />
           <UserNav />
         </ShowNav>
-        {children}
+        <GlobalProvider>{children}</GlobalProvider>
         <ShowFooter restrictedPaths={restrictedPathsToFooter}>
           <Footer />
         </ShowFooter>

@@ -65,6 +65,7 @@ export type Variant = {
   image_id: string;
   stock: number;
   price: number;
+  materials: SelectedMaterial[];
   created_at: string;
   updated_at: string;
 };
@@ -96,11 +97,48 @@ export type Product = {
   average_rating: number;
   total_reviews: number;
   variant_ids: string[];
-  categories?: Category[]; // Optional populated categories
-  subcategories?: SubCategory[]; // Optional populated subcategories
-  sizes?: Size[]; // Optional populated sizes
-  colors?: Color[]; // Optional populated colors
-  variants?: Variant[]; // Can be expanded based on the specific variant structure
+  categories?: Category[];
+  subcategories?: SubCategory[];
+  sizes?: Size[];
+  colors?: Color[];
+  variants?: Variant[];
+  productDescriptions: ProductDescription[];
+  productSpecifications: ProductSpecification[];
+  questions: ProductQuestion[];
+};
+
+type ProductSpecification = {
+  id: string;
+  product_id: string;
+  specifications: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+};
+
+type ProductDescription = {
+  id: string;
+  product_id: string;
+  description_html: string;
+  created_at: string;
+  updated_at: string;
+};
+
+type Answer = {
+  id: string;
+  question_id: string;
+  user_id: string;
+  answer: string;
+  is_admin_answer: boolean;
+  created_at: string;
+};
+
+type ProductQuestion = {
+  id: string;
+  product_id: string;
+  user_id: string;
+  question: string;
+  created_at: string;
+  answers: Answer[];
 };
 
 export type FeaturedOffering = {
@@ -170,6 +208,7 @@ export interface SelectedMaterial {
   description: string;
   created_at: string;
   material_image_id: string;
+  material_image: string;
   id: string;
 }
 
@@ -182,13 +221,14 @@ export interface SelectedColor {
 
 export interface CartItem {
   product_id: string;
+  product: Product;
   quantity: number;
-  created_at: string;
-  id: string;
+  created_at?: string;
+  id?: string;
   selected_sizes: SelectedSize[];
-  selected_materials: SelectedMaterial[];
+  selected_variants: Variant[];
   selected_colors: SelectedColor[];
-  cart_id: string;
+  cart_id?: string;
 }
 
 export interface CartData {
@@ -203,16 +243,6 @@ export interface CartData {
 
 export interface ApiResponse<T> {
   data: T;
-}
-
-export interface CartState {
-  cart: CartData | null;
-  addItem: (item: CartItem) => Promise<void>;
-  removeItem: (id: string) => Promise<void>;
-  removeItems: (ids: string[]) => Promise<void>;
-  updateQuantity: (id: string, quantity: number) => Promise<void>;
-  getCart: () => Promise<void>;
-  synchronizeCart: () => Promise<void>;
 }
 
 export type Upload = {
