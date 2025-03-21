@@ -5,7 +5,7 @@ interface PageProps {
 }
 
 export default async function Page({ params }: PageProps) {
-  const { id } = await params;
+  const { id } = params;
   return (
     <>
       <ViewProduct productId={id} />
