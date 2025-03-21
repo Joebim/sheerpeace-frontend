@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Heart } from "lucide-react";
 import useWishlistStore from "@/store/wishlist.store";
 import { useState, useEffect } from "react";

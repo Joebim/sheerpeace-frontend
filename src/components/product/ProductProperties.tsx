@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Product } from "@/types";
@@ -13,16 +13,19 @@ export default function ProductProperties({ product }: ProductPropertiesProps) {
   const [activeTab, setActiveTab] = useState("reviews");
 
   // Section refs for observing
-  const sectionRefs: Record<
-    "reviews" | "specifications" | "description" | "store" | "qa",
-    React.RefObject<HTMLDivElement | null>
-  > = {
-    reviews: useRef<HTMLDivElement>(null),
-    specifications: useRef<HTMLDivElement>(null),
-    description: useRef<HTMLDivElement>(null),
-    store: useRef<HTMLDivElement>(null),
-    qa: useRef<HTMLDivElement>(null),
-  };
+  const reviewsRef = useRef<HTMLDivElement>(null);
+  const specificationsRef = useRef<HTMLDivElement>(null);
+  const descriptionRef = useRef<HTMLDivElement>(null);
+  const storeRef = useRef<HTMLDivElement>(null);
+  const qaRef = useRef<HTMLDivElement>(null);
+
+  const sectionRefs = useMemo(() => ({
+    reviews: reviewsRef,
+    specifications: specificationsRef,
+    description: descriptionRef,
+    store: storeRef,
+    qa: qaRef,
+  }), []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -40,7 +43,7 @@ export default function ProductProperties({ product }: ProductPropertiesProps) {
     });
 
     return () => observer.disconnect();
-  }, []);
+  }, [sectionRefs]);
 
   const scrollToSection = (section: keyof typeof sectionRefs) => {
     sectionRefs[section]?.current?.scrollIntoView({
