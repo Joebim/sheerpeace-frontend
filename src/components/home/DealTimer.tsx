@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface CounterProps {
   timerPrompt: string;
@@ -9,7 +9,7 @@ const DealTimer: React.FC<CounterProps> = ({
   timerPrompt,
   discountEndDate,
 }) => {
-  const calculateTimeLeft = () => {
+  const calculateTimeLeft = useCallback(() => {
     const endTime = new Date(discountEndDate).getTime();
     const now = new Date().getTime();
     const difference = endTime - now;
@@ -22,9 +22,9 @@ const DealTimer: React.FC<CounterProps> = ({
       mins: Math.floor((difference / (1000 * 60)) % 60),
       secs: Math.floor((difference / 1000) % 60),
     };
-  };
+  }, [discountEndDate]);
 
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+  const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; mins: number; secs: number }>(calculateTimeLeft());
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -32,7 +32,7 @@ const DealTimer: React.FC<CounterProps> = ({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [discountEndDate]);
+  }, [discountEndDate, calculateTimeLeft]);
 
   return (
     <div className="flex flex-row items-center justify-between">
