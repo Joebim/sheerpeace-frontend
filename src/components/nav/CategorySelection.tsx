@@ -1,12 +1,13 @@
-import useFetch from "@/hooks/useFetch";
 import React, { useEffect, useState } from "react";
 import { Category, SubCategory } from "@/types";
 import Image from "next/image";
 import { renderImageUrl } from "@/hooks/useRenderImageUrl";
 
 interface categoryProps {
+  subcategories: SubCategory[];
   categories: Category[];
   loading: boolean;
+  subcategoryLoading: boolean;
 }
 
 const SkeletonLoader = () => (
@@ -17,11 +18,12 @@ const SkeletonLoader = () => (
 );
 
 export default function CategorySelection({
+  subcategories,
+  subcategoryLoading,
   categories,
   loading,
 }: categoryProps) {
-  const { data: subcategories, loading: subcategoryLoading } =
-    useFetch<SubCategory[]>("/subcategories");
+
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null
   );

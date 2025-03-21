@@ -1,3 +1,5 @@
+"use client";
+
 import { Product } from "@/types";
 import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";

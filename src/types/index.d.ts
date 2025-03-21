@@ -99,9 +99,9 @@ export type Product = {
   variant_ids: string[];
   categories?: Category[];
   subcategories?: SubCategory[];
-  sizes?: Size[];
-  colors?: Color[];
-  variants?: Variant[];
+  sizes: Size[];
+  colors: Color[];
+  variants: Variant[];
   productDescriptions: ProductDescription[];
   productSpecifications: ProductSpecification[];
   questions: ProductQuestion[];
@@ -262,4 +262,28 @@ export interface Blog {
   authorImage: string;
   postDate: string;
   readingTime: string;
+}
+export type Wishlist = {
+  id: string;
+  user_id: string;
+  product_id: string;
+  product: Product;
+  created_at: string;
+};
+
+export interface SearchSuggestion {
+  id: string; // UUID
+  query: string;
+  count: number;
+  created_at: Date;
+  updated_at: Date;
+}
+
+interface PaginatedProducts {
+  products: Product[];
+  total: number;
+  totalPages: number;
+  page: number;
+  perPage: number;
+  limit: number;
 }

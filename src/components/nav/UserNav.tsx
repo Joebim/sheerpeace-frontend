@@ -1,11 +1,12 @@
 "use client";
 
-import { forwardRef } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useCartStore } from "@/store/cart.store";
 import useUserStore from "@/store/user.store";
 import { UserDropdownMenu } from "../home/UserdropdownMenu";
 import {
+  ArrowUpLeft,
   Bell,
   ChevronDown,
   CircleUserRound,
@@ -15,7 +16,7 @@ import {
   Search,
   ShoppingBag,
 } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { NotificationDropdown } from "../home/NotificationDropdown";
 import useNotificationStore from "@/store/notification.store";
 import SheerpeaceWordmark from "../../../public/sheerpeace-word-mark.svg";
@@ -36,36 +37,109 @@ import { NavigationMenu as NavigationMenuCopy } from "../ui/navigation-menu copy
 
 import { cn } from "@/lib/utils";
 import CategorySelection from "./CategorySelection";
-import useFetch from "@/hooks/useFetch";
-import { Category } from "@/types";
 import UserSideBar from "./UserSideBar";
+import { useUser } from "@/hooks/useJwt";
 
 import { match } from "path-to-regexp"; // Install with: npm install path-to-regexp
+import { useCategoryStore } from "@/store/category.store";
+import { useSubCategoryStore } from "@/store/subCategory.store";
+import useClickOutside from "@/hooks/useClickOutside";
+import { useSearchStore } from "@/store/search.store";
+import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
+import { SearchSuggestion } from "@/types";
 
 const ALLOWED_SEARCH_ROUTES = ["/", "/products/:id"];
 
 const UserNav: React.FC = () => {
   const { cart } = useCartStore();
-  const { user, isAuthenticated } = useUserStore();
+  const { isAuthenticated } = useUserStore();
   const pathname = usePathname();
   const { notifications } = useNotificationStore();
 
-const isAllowedRoute = (pathname: string) => {
-  return ALLOWED_SEARCH_ROUTES.some((route) => {
-    const matchRoute = match(route, { decode: decodeURIComponent });
-    return matchRoute(pathname);
+  const userDetails = useUser();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const searchRef = useRef<HTMLDivElement>(null);
+  const { term, suggestions, setTerm, fetchSuggestions } = useSearchStore();
+  const router = useRouter();
+
+  useClickOutside({
+    ref: searchRef,
+    callback: () => setShowSuggestions(false),
   });
-};
 
-const showSearch = isAllowedRoute(pathname);
+  const isAllowedRoute = (pathname: string) => {
+    return ALLOWED_SEARCH_ROUTES.some((route) => {
+      const matchRoute = match(route, { decode: decodeURIComponent });
+      return matchRoute(pathname);
+    });
+  };
 
-  const { data: categories, loading } = useFetch<Category[]>("/categories");
+  const showSearch = isAllowedRoute(pathname);
+
+  const { categories, loading, fetchCategories } = useCategoryStore();
+  const {
+    subcategories,
+    loading: subcategoryLoading,
+    fetchSubCategories,
+  } = useSubCategoryStore();
+
+  useEffect(() => {
+    if (!categories.length) {
+      fetchCategories();
+    }
+    if (!subcategories.length) {
+      fetchSubCategories();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!suggestions.length) {
+      fetchSuggestions();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fetch search suggestions when user types
+  const { data: dynamicSuggestions, isLoading } = useSearchSuggestions(
+    term ?? searchTerm
+  );
+
+  const handleFocus = () => {
+    setShowSuggestions(true);
+  };
+
+  const handleBlur = () => {
+    setTimeout(() => setShowSuggestions(false), 200);
+  };
+
+  const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && searchTerm.trim()) {
+      e.preventDefault();
+      router.push(`/search?query=${encodeURIComponent(searchTerm)}`);
+      setSearchTerm("");
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSearch = (query: string) => {
+    router.push(`/search?query=${encodeURIComponent(query)}`);
+    setSearchTerm("");
+    setShowSuggestions(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    setTerm(value);
+    setShowSuggestions(value.trim().length > 0);
+  };
 
   return (
     <>
       <nav className="sticky top-0 bg-sheerpeace-purple text-[13px] py-[10px] gap-[15px] w-full text-sheerpeace-purple-secondary px-6 sm:px-12 flex flex-col items-center z-[40] duration-300">
         <div className="w-full">
-          <div className="flex w-full items-center justify-between relative">
+          <div className="flex w-full items-center justify-between relative gap-[20px]">
             <div>
               <Link href="/">
                 <div className="flex flex-row items-center">
@@ -75,14 +149,70 @@ const showSearch = isAllowedRoute(pathname);
               </Link>
             </div>
             {/* Search Bar (Desktop) */}
-            <div className="md-[300px] lg:w-[600px] relative hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-white">
-              <Search className="cursor-pointer text-[#e5b4ff]" />
-              <input
-                type="text"
-                placeholder="Search"
-                className="bg-transparent outline-none text-sheerpeace-black w-full"
-              />
+            <div className="relative w-[60%] hidden sm:flex items-center">
+              <div className="w-full relative flex items-center gap-2 px-4 py-2 rounded-full bg-white">
+                <Search className="cursor-pointer text-[#e5b4ff]" />
+                <input
+                  type="text"
+                  placeholder="Search"
+                  className="bg-transparent outline-none text-sheerpeace-black w-full"
+                  value={term}
+                  onChange={handleInputChange}
+                  onFocus={handleFocus}
+                  onBlur={handleBlur}
+                  onKeyDown={handleSearchSubmit}
+                />
+              </div>
+
+              {showSuggestions && (
+                <div
+                  ref={searchRef}
+                  className="absolute top-[100%] left-0 w-full bg-white rounded-xl shadow-md mt-2 z-50  overflow-hidden"
+                >
+                  {isLoading && (
+                    <p className="px-4 py-2 text-gray-500">Loading...</p>
+                  )}
+                  {showSuggestions && (dynamicSuggestions?.length ?? 0) > 0 ? (
+                    <ul className="w-full">
+                      {dynamicSuggestions?.map(
+                        (suggestion: SearchSuggestion, index: number) => (
+                          <li
+                            key={index}
+                            className="p-2 px-[15px] flex flex-row justify-between hover:bg-gray-100 cursor-pointer items-center"
+                            onClick={() => handleSearch(suggestion.query)}
+                          >
+                            <span className="flex flex-row gap-[5px] items-center">
+                              <Search className="w-[13px]" />
+                              <span>{suggestion.query}</span>
+                            </span>
+                            <ArrowUpLeft className="w-[15px]" />
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  ) : (
+                    <div className="flex flex-col gap-[10px] p-[20px] ">
+                      <span className="text-[14px] font-bold">
+                        Trending Searches
+                      </span>
+                      <div className="flex-wrap flex gap-2">
+                        {suggestions?.map((item, index) => (
+                          <div
+                            key={index}
+                            className="py-[4px] px-[10px] flex flex-row gap-[5px] border border-solid border-sheerpeace-black rounded-full text-sheerpeace-black items-center text-[13px] hover:bg-sheerpeace-purple duration-150 cursor-pointer  "
+                            onClick={() => handleSearch(item.query)}
+                          >
+                            <Search className="w-[13px]" />
+                            <span>{item.query}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
+
             {/* Right Section - Actions */}
             <div className="flex items-center gap-6">
               {/* Notifications */}
@@ -112,7 +242,9 @@ const showSearch = isAllowedRoute(pathname);
                 <div className="group cursor-pointer flex items-center gap-2">
                   <CircleUserRound className=" stroke-sheerpeace-green w-[25px]" />
                   <p className="hidden md:block text-sheerpeace-purple-secondary font-medium group-hover:text-black">
-                    {isAuthenticated ? `Hi, ${user?.first_name}` : "Account"}
+                    {isAuthenticated
+                      ? `Hi, ${userDetails?.user.first_name}`
+                      : "Account"}
                   </p>
                   <ChevronDown className="hidden md:block text-sheerpeace-purple-secondary" />
                 </div>
@@ -132,6 +264,8 @@ const showSearch = isAllowedRoute(pathname);
                   </NavigationMenuTrigger>
                   <NavigationMenuContent className="h-full">
                     <CategorySelection
+                      subcategories={subcategories ?? []}
+                      subcategoryLoading={subcategoryLoading}
                       categories={categories ?? []}
                       loading={loading}
                     />
@@ -276,13 +410,65 @@ const showSearch = isAllowedRoute(pathname);
           </UserSideBar>{" "}
           {/* Search Bar (Mobile) */}
           {showSearch && (
-            <div className="w-full flex sm:hidden items-center gap-2 px-4 py-2 bg-white rounded-full">
+            <div className="relative w-full flex sm:hidden items-center gap-2 px-4 py-2 bg-white rounded-full">
               <Search className="cursor-pointer text-[#e5b4ff]" />
               <input
                 type="text"
                 placeholder="Search"
                 className="bg-transparent outline-none text-sheerpeace-black w-full"
+                value={term}
+                onChange={handleInputChange}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                onKeyDown={handleSearchSubmit}
               />
+            </div>
+          )}
+          {showSuggestions && (
+            <div
+              ref={searchRef}
+              className="absolute top-[100%] left-0 w-full bg-white rounded-xl shadow-md mt-2 z-50  overflow-hidden"
+            >
+              {isLoading && (
+                <p className="px-4 py-2 text-gray-500">Loading...</p>
+              )}
+              {showSuggestions && (dynamicSuggestions?.length ?? 0) > 0 ? (
+                <ul className="w-full">
+                  {dynamicSuggestions?.map(
+                    (suggestion: SearchSuggestion, index: number) => (
+                      <li
+                        key={index}
+                        className="p-2 px-[15px] flex flex-row justify-between hover:bg-gray-100 cursor-pointer items-center"
+                        onClick={() => handleSearch(suggestion.query)}
+                      >
+                        <span className="flex flex-row gap-[5px] items-center">
+                          <Search className="w-[13px]" />
+                          <span>{suggestion.query}</span>
+                        </span>
+                        <ArrowUpLeft className="w-[15px]" />
+                      </li>
+                    )
+                  )}
+                </ul>
+              ) : (
+                <div className="flex flex-col gap-[10px] p-[20px] ">
+                  <span className="text-[14px] font-bold">
+                    Trending Searches
+                  </span>
+                  <div className="flex-wrap flex gap-2">
+                    {suggestions?.map((item, index) => (
+                      <div
+                        key={index}
+                        className="py-[4px] px-[10px] flex flex-row gap-[5px] border border-solid border-sheerpeace-black rounded-full text-sheerpeace-black items-center text-[13px] hover:bg-sheerpeace-purple duration-150 cursor-pointer  "
+                        onClick={() => handleSearch(item.query)}
+                      >
+                        <Search className="w-[13px]" />
+                        <span>{item.query}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

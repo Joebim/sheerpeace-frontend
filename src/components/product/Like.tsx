@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Heart } from "lucide-react";
-// import { useWishlistStore } from "@/store/wishlistStore";
+import useWishlistStore from "@/store/wishlist.store";
 import { useState, useEffect } from "react";
 
 interface LikeProps {
@@ -8,21 +8,21 @@ interface LikeProps {
 }
 
 const Like: React.FC<LikeProps> = ({ productId }) => {
-  // const { wishlist, addToWishlist, removeFromWishlist } = useWishlistStore();
+  const { wishlist, addToWishlist, removeFromWishlist } = useWishlistStore();
   const [liked, setLiked] = useState(false);
 
   // Check if the apparel is in the wishlist
-  // useEffect(() => {
-  //   const isLiked = wishlist?.apparels.some((item) => item._id === apparelId) ?? false;
-  //   setLiked(isLiked);
-  // }, [wishlist, apparelId]);
+  useEffect(() => {
+    const isLiked = wishlist.some((item) => item.product_id === productId) ?? false;
+    setLiked(isLiked);
+  }, [wishlist, productId]);
 
   const handleLike = async () => {
-    // if (liked) {
-    //   removeFromWishlist(apparelId);
-    // } else {
-    //   addToWishlist(apparelId);
-    // }
+    if (liked) {
+      removeFromWishlist(productId);
+    } else {
+      addToWishlist(productId);
+    }
     // Optimistically update liked state
     setLiked(!liked);
   };

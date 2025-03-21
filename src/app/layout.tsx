@@ -8,6 +8,7 @@ import Footer from "@/components/footer/Footer";
 import ShowFooter from "@/components/footer/ShowFooter";
 import { Toaster } from "sonner";
 import GlobalProvider from "@/context/GlobalProvider";
+import QueryProvider from "@/context/QueryProvider";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -31,14 +32,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${poppins.className} bg-white`}>
-        <ShowNav restrictedPaths={restrictedPathsToNav}>
-          <AnnounceBar />
-          <UserNav />
-        </ShowNav>
-        <GlobalProvider>{children}</GlobalProvider>
-        <ShowFooter restrictedPaths={restrictedPathsToFooter}>
-          <Footer />
-        </ShowFooter>
+        <QueryProvider>
+          <ShowNav restrictedPaths={restrictedPathsToNav}>
+            <AnnounceBar />
+            <UserNav />
+          </ShowNav>
+          <GlobalProvider>{children}</GlobalProvider>
+          <ShowFooter restrictedPaths={restrictedPathsToFooter}>
+            <Footer />
+          </ShowFooter>
+        </QueryProvider>
         <Toaster />
       </body>
     </html>

@@ -1,7 +1,7 @@
 "use client";
 
 import useFetch from "@/hooks/useFetch";
-import { Product } from "@/types";
+import { PaginatedProducts, Product } from "@/types";
 import React, { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
@@ -46,7 +46,7 @@ export default function ViewProduct({ productId }: ViewProductProps) {
   const [count, setCount] = React.useState(0);
   const [productLoading, setProductLoading] = React.useState(true);
 
-  const { data: products, loading } = useFetch<Product[]>(`/products`);
+  const { data: products, loading } = useFetch<PaginatedProducts>(`/products`);
 
   const { addItem } = useCartStore();
 
@@ -96,9 +96,9 @@ export default function ViewProduct({ productId }: ViewProductProps) {
       product_id: product.id,
       product: product,
       quantity: 1,
-      selected_sizes: product?.sizes || [],
-      selected_variants: product?.variants || [],
-      selected_colors: product?.colors || [],
+      selected_sizes: product?.sizes,
+      selected_variants: product?.variants,
+      selected_colors: product?.colors,
     });
   };
 
@@ -289,7 +289,7 @@ export default function ViewProduct({ productId }: ViewProductProps) {
           )}
 
           <ProductListSection
-            products={products || []}
+            products={products?.products || []}
             headerTitle="Related Items"
           />
 
@@ -297,12 +297,12 @@ export default function ViewProduct({ productId }: ViewProductProps) {
 
           <ProductSection
             headerTitle="Featured Products"
-            products={products}
+            products={products?.products}
             loading={loading}
           />
           <ProductSection
             headerTitle="Featured Products"
-            products={products}
+            products={products?.products}
             loading={loading}
           />
         </div>

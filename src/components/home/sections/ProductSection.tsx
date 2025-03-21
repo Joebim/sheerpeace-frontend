@@ -16,7 +16,7 @@ import ProductCardSkeleton from "@/components/product/ProductCardSkeleton";
 interface ProductSectionProps {
   headerTitle: string;
   products: Product[] | undefined;
-  loading: boolean;
+  loading: boolean | undefined;
 }
 
 const ProductSection: React.FC<ProductSectionProps> = ({
@@ -27,8 +27,12 @@ const ProductSection: React.FC<ProductSectionProps> = ({
   const [productLoading, setProductLoading] = useState(true);
 
   useEffect(() => {
-    setProductLoading(loading);
+    setProductLoading(loading ?? true);
   }, [loading]);
+
+  if (!products || products.length === 0) {
+    return null;
+  }
 
   return (
     <div className="">
