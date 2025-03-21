@@ -9,6 +9,7 @@ import ShowFooter from "@/components/footer/ShowFooter";
 import { Toaster } from "sonner";
 import GlobalProvider from "@/context/GlobalProvider";
 import QueryProvider from "@/context/QueryProvider";
+import { Suspense } from "react";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -33,14 +34,16 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${poppins.className} bg-white`}>
         <QueryProvider>
-          <ShowNav restrictedPaths={restrictedPathsToNav}>
-            <AnnounceBar />
-            <UserNav />
-          </ShowNav>
-          <GlobalProvider>{children}</GlobalProvider>
-          <ShowFooter restrictedPaths={restrictedPathsToFooter}>
-            <Footer />
-          </ShowFooter>
+          <Suspense>
+            <ShowNav restrictedPaths={restrictedPathsToNav}>
+              <AnnounceBar />
+              <UserNav />
+            </ShowNav>
+            <GlobalProvider>{children}</GlobalProvider>
+            <ShowFooter restrictedPaths={restrictedPathsToFooter}>
+              <Footer />
+            </ShowFooter>
+          </Suspense>
         </QueryProvider>
         <Toaster />
       </body>
