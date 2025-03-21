@@ -1,9 +1,5 @@
 import ViewProduct from "./components/ViewProduct";
 
-interface PageProps {
-  params: { id: string };
-}
-
-export default async function Page({ params }: PageProps) {
+export default async function Page({ params }: Awaited<{ params: { id: string } }>) {
   return <ViewProduct productId={params.id} />;
 }
