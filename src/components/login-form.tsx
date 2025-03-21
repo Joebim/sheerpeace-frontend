@@ -21,7 +21,7 @@ export function LoginForm({ className, onSuccess, ...props }: LoginFormProps) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const { fetchUser, setAuthToken } = useUserStore();
+  const { fetchUser, setAuthUser } = useUserStore();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -35,8 +35,7 @@ export function LoginForm({ className, onSuccess, ...props }: LoginFormProps) {
     try {
       setLoading(true);
       const response = await loginUser(credentials);
-      console.log(response);
-      setAuthToken(response.token);
+      setAuthUser(response);
       fetchUser();
       if (response) {
         onSuccess?.();

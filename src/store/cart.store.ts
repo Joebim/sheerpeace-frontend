@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { getJwt } from "@/lib/cookie";
+import { getUserCookie } from "@/lib/cookie";
 import { CartItem, CartData } from "@/types";
 import apiClient from "@/api/client/apiClient";
 import { toast } from "sonner";
@@ -8,9 +8,9 @@ import { toast } from "sonner";
 export interface CartState {
   cart: CartData | null;
   addItem: (item: CartItem) => Promise<void>;
-  removeItem: (id: string) => Promise<void>;
-  removeItems: (ids: string[]) => Promise<void>;
-  updateQuantity: (id: string, quantity: number) => Promise<void>;
+  removeItem: (productId: string) => Promise<void>;
+  removeItems: (productIds: string[]) => Promise<void>;
+  updateQuantity: (productId: string, quantity: number) => Promise<void>;
   getCart: () => Promise<void>;
   synchronizeCart: () => Promise<void>;
 }
@@ -21,12 +21,10 @@ export const useCartStore = create<CartState>()(
       cart: null,
 
       addItem: async (item: CartItem) => {
-
-        const token = await getJwt();
+        const { token } = await getUserCookie();
         if (!token) {
-          console.warn("User not authenticated. Adding item locally.");
+          console.warn("User not authenticated. You can add item locally.");
         }
-
         const currentCart: CartData = get().cart || {
           user_id: "",
           created_at: "",
@@ -37,7 +35,7 @@ export const useCartStore = create<CartState>()(
           items: [],
         };
 
-        // Check if the item already exists
+        // Check if the item exists in the cart
         const existingItem = currentCart.items.find(
           (cartItem) => cartItem.product_id === item.product_id
         );
@@ -46,14 +44,9 @@ export const useCartStore = create<CartState>()(
           existingItem.quantity += item.quantity;
         } else {
           currentCart.items.push(item);
-          if (!token) {
-            toast.success("Item added to cart", {
-              description: `${item.quantity}x ${item.product.name}`,
-            });
-          }
         }
 
-        // Update cart totals
+        // Update totals
         currentCart.total_items = currentCart.items.reduce(
           (total, item) => total + item.quantity,
           0
@@ -62,155 +55,200 @@ export const useCartStore = create<CartState>()(
           .reduce(
             (total, item) =>
               total +
-              item.quantity *
-                parseFloat(currentCart.total_price?.toString() || "0"),
+              item.quantity * parseFloat(item.product.price?.toString() || "0"),
             0
           )
           .toFixed(2);
 
         set({ cart: { ...currentCart } });
 
-        try {
-          await apiClient.post(
-            `${process.env.NEXT_PUBLIC_BASE_URL}/api/carts/add`,
-            {
-              product_id: item.product_id,
-              quantity: item.quantity,
-              selected_sizes: item.selected_sizes.map((size) => size.id),
-              selected_variants: item.selected_variants.map(
-                (variant) => variant.id
-              ),
-              selected_colors: item.selected_colors.map((color) => color.id),
-            },
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
+        toast.success("Item added to cart", {
+          description: `${item.quantity}x ${item.product.name}`,
+        });
 
-          toast.success("Item added to cart", {
-            description: `${item.quantity}x ${item.product.name}`,
-          });
-        } catch (error) {
-          console.error("Failed to add item to API", error);
+        // If logged in, sync with the backend
+        if (token) {
+          try {
+            await apiClient.post(
+              `${process.env.NEXT_PUBLIC_BASE_URL}/api/carts/add`,
+              {
+                product_id: item.product_id,
+                quantity: item.quantity,
+                selected_sizes: item.selected_sizes.map((size) => size.id),
+                selected_variants: item.selected_variants.map(
+                  (variant) => variant.id
+                ),
+                selected_colors: item.selected_colors.map((color) => color.id),
+              },
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            );
+          } catch (error) {
+            console.error("Failed to add item to API", error);
+          }
         }
       },
 
-      removeItem: async (id: string) => {
-        const token = await getJwt();
-        if (!token)
-          return console.warn("User not authenticated. Cannot remove item.");
+      removeItem: async (productId: string) => {
+        const { token } = await getUserCookie();
+        if (!token) {
+          console.warn("User not authenticated. You can remove item locally");
+        }
+        const { cart } = get();
+        if (!cart) {
+          console.warn("Cart data is not available.");
+          return;
+        }
 
-        const currentCart = get().cart;
-        if (!currentCart) return console.warn("Cart data is not available.");
-
-        currentCart.items = currentCart.items.filter((item) => item.id !== id);
-        currentCart.total_items = currentCart.items.reduce(
+        // Remove item locally using productId
+        cart.items = cart.items.filter((item) => item.product.id !== productId);
+        cart.total_items = cart.items.reduce(
           (total, item) => total + item.quantity,
           0
         );
-        currentCart.total_price = currentCart.items
+        cart.total_price = cart.items
           .reduce(
             (total, item) =>
-              total + item.quantity * parseFloat(currentCart.total_price),
+              total + item.quantity * parseFloat(item.product.price.toString()),
             0
           )
           .toFixed(2);
 
-        set({ cart: { ...currentCart } });
+        set({ cart: { ...cart } });
 
-        try {
-          await apiClient.delete(`/api/carts/remove/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          toast.success("Item removed from cart");
-        } catch (error) {
-          console.error("Failed to remove item from API", error);
+        toast.success("Item removed from cart");
+
+        // Sync with backend only if logged in
+        if (token) {
+          try {
+            await apiClient.delete(`/api/carts/remove/${productId}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            console.log("Item removed from server cart");
+          } catch (error) {
+            console.error("Failed to remove item from API", error);
+          }
+        }
+      },
+      removeItems: async (productIds: string[]) => {
+        const { token } = await getUserCookie();
+        if (!token) {
+          console.warn("User not authenticated.You can remove items locally.");
+        }
+        const { cart } = get();
+        if (!cart) {
+          console.warn("Cart data is not available.");
+          return;
+        }
+
+        // Remove items locally using productId
+        cart.items = cart.items.filter(
+          (item) => !productIds.includes(item.product.id)
+        );
+        cart.total_items = cart.items.reduce(
+          (total, item) => total + item.quantity,
+          0
+        );
+        cart.total_price = cart.items
+          .reduce(
+            (total, item) =>
+              total + item.quantity * parseFloat(item.product.price.toString()),
+            0
+          )
+          .toFixed(2);
+
+        set({ cart: { ...cart } });
+
+        toast.success("Items removed from cart");
+
+        // Sync with backend only if logged in
+        if (token) {
+          try {
+            const filteredProductIds = productIds.filter((id) => id !== null);
+            if (filteredProductIds.length > 0) {
+              await apiClient.post(
+                `/api/carts/remove-multiple`,
+                { ids: filteredProductIds },
+                {
+                  headers: { Authorization: `Bearer ${token}` },
+                }
+              );
+              console.log("Items removed from server cart");
+            }
+          } catch (error) {
+            console.error("Failed to remove items from API", error);
+          }
         }
       },
 
-      removeItems: async (ids: string[]) => {
-        const token = await getJwt();
-        if (!token)
-          return console.warn("User not authenticated. Cannot remove items.");
+      updateQuantity: async (productId: string, quantity: number) => {
+        const { token } = await getUserCookie();
+        if (!token) {
+          console.warn(
+            "User not authenticated. Youc can update quantity locally"
+          );
+        }
+        const { cart } = get();
 
-        const currentCart = get().cart;
-        if (!currentCart) return console.warn("Cart data is not available.");
+        if (!cart) {
+          console.warn("Cart data is not available.");
+          return;
+        }
 
-        currentCart.items = currentCart.items.filter(
-          (item) => item.id && !ids.includes(item.id)
+        console.log("Current cart:", cart);
+
+        // Find item using productId for offline updates
+        const updatedItems = cart.items.find(
+          (item) => item.product.id === productId
         );
-        currentCart.total_items = currentCart.items.reduce(
+
+        if (updatedItems) {
+          updatedItems.quantity = quantity;
+        }
+
+        // Recalculate totals
+        cart.total_items = cart.items.reduce(
           (total, item) => total + item.quantity,
           0
         );
-        currentCart.total_price = currentCart.items
+        cart.total_price = cart.items
           .reduce(
             (total, item) =>
-              total + item.quantity * parseFloat(currentCart.total_price),
+              total + item.quantity * parseFloat(item.product.price.toString()),
             0
           )
           .toFixed(2);
 
-        set({ cart: { ...currentCart } });
+        // Update Zustand state
+        set({
+          cart: {
+            ...cart,
+          },
+        });
 
-        try {
-          await apiClient.post(
-            `/api/carts/remove-multiple`,
-            { ids },
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
-          toast.success("Your cart has been cleared");
-        } catch (error) {
-          console.error("Failed to remove items from API", error);
-        }
-      },
+        console.log("Updated cart:", get().cart);
+        toast.success("Cart updated");
 
-      updateQuantity: async (id: string, quantity: number) => {
-        const token = await getJwt();
-        if (!token)
-          return console.warn(
-            "User not authenticated. Cannot update quantity."
-          );
-
-        const currentCart = get().cart;
-        if (!currentCart) return console.warn("Cart data is not available.");
-
-        const itemToUpdate = currentCart.items.find((item) => item.id === id);
-        if (itemToUpdate) {
-          itemToUpdate.quantity = quantity;
-        }
-
-        currentCart.total_items = currentCart.items.reduce(
-          (total, item) => total + item.quantity,
-          0
-        );
-        currentCart.total_price = currentCart.items
-          .reduce(
-            (total, item) =>
-              total + item.quantity * parseFloat(currentCart.total_price),
-            0
-          )
-          .toFixed(2);
-
-        set({ cart: { ...currentCart } });
-
-        try {
-          await apiClient.put(
-            `/api/carts/update/${id}`,
-            { quantity },
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
-        } catch (error) {
-          console.error("Failed to update item quantity in API", error);
+        // Sync with backend only if logged in
+        if (token) {
+          try {
+            await apiClient.put(
+              `/api/carts/update/${productId}`,
+              { product_id: productId, quantity },
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            );
+            console.log("Cart updated on server");
+          } catch (error) {
+            console.error("Failed to update item quantity in API", error);
+          }
         }
       },
 
       getCart: async () => {
-        const token = await getJwt();
+        const { token } = await getUserCookie();
         if (!token)
           return console.warn("User not authenticated. Cannot fetch cart.");
 
@@ -225,7 +263,8 @@ export const useCartStore = create<CartState>()(
       },
 
       synchronizeCart: async () => {
-        const token = await getJwt();
+        const { token } = await getUserCookie();
+
         if (!token) {
           console.warn("User not authenticated. Cannot synchronize cart.");
           return;
@@ -233,77 +272,108 @@ export const useCartStore = create<CartState>()(
 
         const localCart = get().cart;
 
+        if (!localCart || localCart.items.length === 0) {
+          console.warn("No local cart found or it's empty.");
+          return;
+        }
+
         try {
-          // Fetch latest cart from API
+          // Fetch the cart from the backend
           const response = await apiClient.get<CartData>(`/api/carts`, {
             headers: { Authorization: `Bearer ${token}` },
           });
-          const apiCart = response.data;
 
-          if (!localCart) {
-            set({ cart: apiCart });
+          const serverCart = response.data;
+
+          if (!serverCart || serverCart.items.length === 0) {
+            console.log("No existing cart on the server, sending local cart.");
+            await apiClient.post<CartData>(
+              `/api/carts/sync`,
+              { cart: localCart },
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            );
+            set({ cart: localCart });
             return;
           }
 
-          // Merge local cart with API cart
-          const mergedItems: CartItem[] = [];
+          // Check if carts are identical (product_id, quantity, total_price)
+          const isSameCart = (cartA: CartData, cartB: CartData) => {
+            if (cartA.items.length !== cartB.items.length) return false;
 
-          // Create a map for API cart items
-          const apiCartMap = new Map<string, CartItem>();
-          for (const apiItem of apiCart.items) {
-            apiCartMap.set(apiItem.product_id, apiItem);
-          }
-
-          for (const localItem of localCart.items) {
-            const apiItem = apiCartMap.get(localItem.product_id);
-            if (apiItem) {
-              // Update quantity to the max and merge attributes
-              apiItem.quantity = Math.max(localItem.quantity, apiItem.quantity);
-              apiItem.selected_sizes =
-                localItem.selected_sizes || apiItem.selected_sizes;
-              apiItem.selected_variants =
-                localItem.selected_variants || apiItem.selected_variants;
-              apiItem.selected_colors =
-                localItem.selected_colors || apiItem.selected_colors;
-            }
-            // Push merged item
-            mergedItems.push(apiItem || localItem);
-            apiCartMap.delete(localItem.product_id); // Remove processed item
-          }
-
-          // Add remaining API items not in local cart
-          mergedItems.push(...apiCartMap.values());
-
-          // Compute updated total items and price
-          const totalItems = mergedItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0
-          );
-          const totalPrice = mergedItems.reduce(
-            (sum, item) =>
-              sum +
-              item.quantity * parseFloat(item.product.price?.toString() || "0"),
-            0
-          );
-
-          const reconciledCart: CartData = {
-            ...localCart,
-            items: mergedItems,
-            total_items: totalItems,
-            total_price: totalPrice.toFixed(2),
+            return cartA.items.every((itemA) => {
+              const itemB = cartB.items.find(
+                (i) => i.product_id === itemA.product_id
+              );
+              return (
+                itemB &&
+                itemA.quantity === itemB.quantity &&
+                parseFloat(cartA.total_price) === parseFloat(cartB.total_price)
+              );
+            });
           };
 
-          // Sync updated cart with backend
-          await apiClient.post(
+          if (isSameCart(localCart, serverCart)) {
+            console.log(
+              "Local cart is identical to the server cart. No sync needed."
+            );
+            return;
+          }
+
+          // Merge local cart with server cart
+          const mergedItemsMap = new Map<string, CartItem>();
+
+          // Add server cart items first
+          for (const item of serverCart.items) {
+            mergedItemsMap.set(item.product_id, { ...item });
+          }
+
+          // Merge local cart items
+          for (const item of localCart.items) {
+            if (mergedItemsMap.has(item.product_id)) {
+              const existingItem = mergedItemsMap.get(item.product_id)!;
+
+              // ✅ If quantities are different, use the local cart's quantity
+              if (existingItem.quantity !== item.quantity) {
+                existingItem.quantity = item.quantity;
+              }
+            } else {
+              mergedItemsMap.set(item.product_id, { ...item });
+            }
+          }
+
+          // Convert merged items map back to an array
+          const mergedCartItems = Array.from(mergedItemsMap.values());
+
+          // Calculate total items and total price
+          const mergedCart: CartData = {
+            ...serverCart,
+            items: mergedCartItems,
+            total_items: mergedCartItems.reduce(
+              (total, item) => total + item.quantity,
+              0
+            ),
+            total_price: mergedCartItems
+              .reduce(
+                (total, item) =>
+                  total +
+                  item.quantity * parseFloat(item.product.price.toString()),
+                0
+              )
+              .toFixed(2),
+          };
+
+          // Send merged cart to the backend
+          const syncResponse = await apiClient.post<CartData>(
             `/api/carts/sync`,
-            { cart: reconciledCart },
+            { cart: mergedCart },
             {
               headers: { Authorization: `Bearer ${token}` },
             }
           );
 
-          // Update Zustand store
-          set({ cart: reconciledCart });
+          console.log("Cart synchronized successfully:", syncResponse.data);
         } catch (error) {
           console.error("Failed to synchronize cart with API", error);
         }

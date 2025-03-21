@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import axios from "axios";
-import { getJwt } from "@/lib/cookie";
+import { getUserCookie } from "@/lib/cookie";
 import { Notification } from "@/types";
 
 interface NotificationState {
@@ -25,7 +25,7 @@ const useNotificationStore = create<NotificationState>((set) => ({
   },
 
   getNotifications: async () => {
-    const token = await getJwt();
+    const { token } = await getUserCookie();
     if (!token) {
       console.warn("User is not authenticated. Cannot fetch notifications.");
       return;
@@ -53,7 +53,7 @@ const useNotificationStore = create<NotificationState>((set) => ({
   },
 
   markAsRead: async (id: string) => {
-    const token = await getJwt();
+    const { token } = await getUserCookie();
     if (!token) {
       console.warn("User is not authenticated. Cannot mark notification as read.");
       return;
@@ -84,7 +84,7 @@ const useNotificationStore = create<NotificationState>((set) => ({
   },
 
   deleteNotification: async (id: string) => {
-    const token = await getJwt();
+    const { token } = await getUserCookie();
     if (!token) {
       console.warn("User is not authenticated. Cannot delete notification.");
       return;

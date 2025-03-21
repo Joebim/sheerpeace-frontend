@@ -1,11 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { NextPage } from "next";
 import FeaturedCarousel from "./FeaturedCarousel";
 import ProductSection from "./sections/ProductSection";
-import useFetch from "@/hooks/useFetch";
-import { Product } from "@/types"; // Adjust the import path as necessary
 import OffersSideCard from "./OffersSideCard";
 import BenefitSection from "./BenefitSection";
 import { Gift } from "lucide-react";
@@ -16,13 +13,12 @@ import SalesBanner from "./SalesBanner";
 import SideProductSession from "./SideProductSession";
 import SideBlogSection from "./SideBlogSection";
 import ProductBanner from "./ProductBanner";
+import { useProductStore } from "@/store/product.store";
 
 const Homepage: NextPage = ({}) => {
-  const {
-    data: featuredProducts,
-    error,
-    loading,
-  } = useFetch<Product[]>("/products");
+  const { loading, trending, isNew, topSelling, topChoice, isFeatured } =
+    useProductStore();
+
   return (
     <>
       <div className="flex flex-col gap-[20px] pt-[25px] sm:px-12 px-[20px]">
@@ -32,7 +28,7 @@ const Homepage: NextPage = ({}) => {
           </div>
           <div className="sm:flex-[30] sm:flex hidden flex-col gap-[20px] sm:w-[45%] w-full">
             <ProductBanner loading={loading} />
-            <OffersSideCard loading={loading}/>
+            <OffersSideCard loading={loading} />
           </div>
         </div>
         <div className="flex flex-row gap-[20px] w-full">
@@ -40,7 +36,7 @@ const Homepage: NextPage = ({}) => {
             <BenefitSection />
             <SideProductSession
               title="Latest Products"
-              products={featuredProducts}
+              products={isFeatured}
               loading={loading}
             />
             <SideBlogSection headerTitle="Latest Blogs" loading={loading} />
@@ -55,21 +51,23 @@ const Homepage: NextPage = ({}) => {
             />
 
             <DealSession
-              dealTitle="Daily Deals"
-              products={featuredProducts}
+              dealTitle="Top Deals"
+              products={topSelling}
               loading={loading}
             />
 
             <ProductSection
               headerTitle="Featured Products"
-              products={featuredProducts}
+              products={isFeatured}
               loading={loading}
             />
+
             <ProductSection
-              headerTitle="Featured Products"
-              products={featuredProducts}
+              headerTitle="New Arrivals"
+              products={isNew}
               loading={loading}
             />
+
             <BannerSection />
 
             <SalesBanner
@@ -82,13 +80,19 @@ const Homepage: NextPage = ({}) => {
               imageUrl="/uploads/images/1740798076784-672867564.jpg"
             />
             <ProductSection
-              headerTitle="Featured Products"
-              products={featuredProducts}
+              headerTitle="Trending Products"
+              products={trending}
               loading={loading}
             />
             <ProductSection
-              headerTitle="Featured Products"
-              products={featuredProducts}
+              headerTitle="Top Choice"
+              products={topChoice}
+              loading={loading}
+            />
+
+            <DealSession
+              dealTitle="Limited Time Deals"
+              products={topSelling}
               loading={loading}
             />
           </div>

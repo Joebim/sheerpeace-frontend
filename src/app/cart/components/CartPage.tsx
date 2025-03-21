@@ -35,7 +35,7 @@ export default function CartPage() {
     <div className="max-w-5xl mx-auto flex flex-col gap-[20px] items-center px-4 py-8">
       <h1 className="text-sheerpeace-black text-[40px] font-bold">Cart</h1>
       {/* Tabs Navigation */}
-      {cart?.items.length === 0 ? (
+      {cart?.items.length == 0 || !cart ? (
         <div className="flex flex-col items-center justify-center min-h-[400px]">
           <h2 className="text-2xl font-semibold mb-4">Your cart is empty</h2>
           <p className="text-gray-500 mb-6">
@@ -87,27 +87,37 @@ export default function CartPage() {
                   <CardContent>
                     {cart?.items?.map((item) => (
                       <div key={item.product_id} className="flex py-3 border-b">
-                        <div className="h-[150px] w-[100px] rounded-[5px] overflow-hidden">
+                        <div
+                          className="h-[150px] w-[100px] rounded-[5px] cursor-pointer overflow-hidden"
+                          onClick={() =>
+                            router.push(`/products/${item.product_id}`)
+                          }
+                        >
                           <Image
                             src={renderImageUrl(item.product.images[0])}
                             height={300}
                             width={300}
                             alt={item.product.name}
                             className="w-full h-full object-cover"
+                            priority
                           />
                         </div>
-                        <div className="flex flex-col gap-[5px] justify-between p-[15px]">
+                        <div className="flex flex-col gap-[5px] justify-between p-[15px] flex-grow">
                           <div className="flex flex-col gap-[10px]">
                             <p className="font-semibold">{item.product.name}</p>
 
-                            <span className="text-sheerpeace-purple-secondary">{formatPrice(item.product.price)}</span>
+                            <span className="text-sheerpeace-purple-secondary">
+                              {formatPrice(item.product.price)}
+                            </span>
                           </div>
                           <div className="flex items-center justify-between gap-4">
                             <QuantityUpdater cartItem={item} />
                             <Button
                               className="text-sheerpeace-black bg-transparent hover:bg-sheerpeace-purple"
                               size="sm"
-                              onClick={() => item.id && removeItem(item.id)}
+                              onClick={() =>
+                                item.id && removeItem(item.product_id)
+                              }
                             >
                               <Trash />
                               <span>Remove</span>

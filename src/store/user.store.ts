@@ -1,12 +1,17 @@
 import { create } from "zustand";
-import { setJwt, getJwt, removeJwt } from "@/lib/cookie";
+import { setUserCookie, getUserCookie, removeUserCookie } from "@/lib/cookie";
 import type { UserData } from "@/types";
+
+interface UserDetails {
+  token: string
+  user: UserData
+}
 
 type UserStore = {
   user: UserData | null;
   authToken: string | null;
   isAuthenticated: boolean;
-  setAuthToken: (token: string) => void;
+  setAuthUser: (userCookies: UserDetails) => void;
   setUser: (user: UserData) => void;
   logout: () => void;
   fetchUser: () => Promise<void>;
@@ -18,20 +23,21 @@ const useUserStore = create<UserStore>((set) => ({
   authToken: null,
   isAuthenticated: false,
 
-  setAuthToken: (token) => {
-    setJwt(token); // Store token in cookies
-    set({ authToken: token, isAuthenticated: true });
+  setAuthUser: (userCookies) => {
+    setUserCookie(userCookies); 
+    set({ authToken: userCookies.token, isAuthenticated: true });
   },
 
   setUser: (user) => set({ user }),
 
   logout: () => {
-    removeJwt(); // Clear JWT from cookies
+    removeUserCookie(); // Clear User from cookies
     set({ user: null, authToken: null, isAuthenticated: false });
   },
 
   fetchUser: async () => {
-    const token = await getJwt(); // Retrieve JWT from cookies
+    const { token } = await getUserCookie(); 
+
     if (!token) return;
 
     try {
@@ -52,9 +58,10 @@ const useUserStore = create<UserStore>((set) => ({
   },
 
   initialize: async () => {
-    const token = await getJwt(); // Check for existing JWT
+    const { token } = await getUserCookie();
+
     if (token) {
-      await useUserStore.getState().fetchUser(); // Fetch user data if JWT is valid
+      await useUserStore.getState().fetchUser(); // Fetch user data if User is valid
     }
   },
 }));
