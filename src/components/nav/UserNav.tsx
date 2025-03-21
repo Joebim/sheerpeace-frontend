@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useEffect, useRef, useState } from "react";
+import { forwardRef, Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useCartStore } from "@/store/cart.store";
 import useUserStore from "@/store/user.store";
@@ -136,7 +136,7 @@ const UserNav: React.FC = () => {
   };
 
   return (
-    <>
+    <Suspense fallback={null}>
       <nav className="sticky top-0 bg-sheerpeace-purple text-[13px] py-[10px] gap-[15px] w-full text-sheerpeace-purple-secondary px-6 sm:px-12 flex flex-col items-center z-[40] duration-300">
         <div className="w-full">
           <div className="flex w-full items-center justify-between relative gap-[20px]">
@@ -473,7 +473,7 @@ const UserNav: React.FC = () => {
           )}
         </div>
       </nav>
-    </>
+    </Suspense>
   );
 };
 

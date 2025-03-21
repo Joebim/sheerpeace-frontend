@@ -6,6 +6,7 @@ import FilterBar from "./FilterBar";
 import Pagination from "./Pagination";
 import axios from "axios";
 import { Product } from "@/types";
+import { useSearchParams } from "next/navigation";
 
 interface PaginatedData {
   products: Product[];
@@ -31,11 +32,10 @@ const fetchSearchResults = async (query: string) => {
   return res.data;
 };
 
-interface SearchPageProps {
-  query: string;
-}
+const SearchPage = () => {
+  const searchParams = useSearchParams();
+  const query = searchParams.get("query") || "";
 
-const SearchPage = ({ query }: SearchPageProps) => {
   const { data: results, isLoading } = useQuery<SearchApi>({
     queryKey: ["searchResults", query],
     queryFn: () => fetchSearchResults(query),
