@@ -19,8 +19,6 @@ const Homepage: NextPage = ({}) => {
   const { loading, trending, isNew, topSelling, topChoice, isFeatured } =
     useProductStore();
 
-  console.log("NEXT_PUBLIC_BASE_URL:", process.env.NEXT_PUBLIC_BASE_URL);
-
   return (
     <>
       <div className="flex flex-col gap-[20px] pt-[25px] sm:px-12 px-[20px]">
