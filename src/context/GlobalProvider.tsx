@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useJwt } from "@/hooks/useJwt";
 import useUserStore from "@/store/user.store";
 import useNotificationStore from "@/store/notification.store";
@@ -16,7 +16,7 @@ export default function GlobalProvider({
   const jwt = useJwt();
   const { initialize, isAuthenticated } = useUserStore();
   const { getNotifications } = useNotificationStore();
-  const { getCart, synchronizeCart } = useCartStore();
+  const { getCartAndSync } = useCartStore();
   const { fetchWishlist } = useWishlistStore();
   const {
     fetchFeatured,
@@ -33,19 +33,13 @@ export default function GlobalProvider({
     products,
   } = useProductStore();
 
-  // ✅ Prevent double execution using useRef
-  const hasFetched = useRef(false);
-
   useEffect(() => {
-    if (hasFetched.current) return; // Prevent re-execution
-    hasFetched.current = true;
-
     const fetchData = async () => {
       if (jwt) {
-        await initialize(); // Step 1: Initialize user first
+        await initialize(); // Step 1: Initialize user
       }
 
-      // Step 2: Fetch products only after user initialization
+      // Step 2: Fetch product data
       await Promise.allSettled([
         !isFeatured.length && fetchFeatured(),
         !isNew.length && fetchNew(),
@@ -55,18 +49,16 @@ export default function GlobalProvider({
         !products.length && fetchProducts(),
       ]);
 
-      // Step 3: Synchronize and fetch cart after product data
-      if (isAuthenticated) {
-        await synchronizeCart();
-        await getCart();
-      }
-
+      // Step 3: Fetch wishlist and notifications
       if (isAuthenticated) {
         await fetchWishlist();
+        await getNotifications();
       }
 
-      // Step 4: Fetch other data (notifications, etc.)
-      await getNotifications();
+      // Step 4: Handle cart fetch separately
+      if (isAuthenticated) {
+        await getCartAndSync();
+      }
     };
 
     fetchData();
