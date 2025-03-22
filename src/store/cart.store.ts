@@ -11,8 +11,7 @@ export interface CartState {
   removeItem: (productId: string) => Promise<void>;
   removeItems: (productIds: string[]) => Promise<void>;
   updateQuantity: (productId: string, quantity: number) => Promise<void>;
-  getCart: () => Promise<void>;
-  synchronizeCart: () => Promise<void>;
+  getCartAndSync: () => Promise<void>;
 }
 
 export const useCartStore = create<CartState>()(
@@ -246,59 +245,20 @@ export const useCartStore = create<CartState>()(
           }
         }
       },
-
-      getCart: async () => {
+      getCartAndSync: async () => {
         const { token } = await getUserCookie();
         if (!token)
           return console.warn("User not authenticated. Cannot fetch cart.");
 
         try {
+          // Fetch cart from the backend
           const response = await apiClient.get<CartData>(`/api/carts`, {
             headers: { Authorization: `Bearer ${token}` },
           });
-          set({ cart: response.data });
-        } catch (error) {
-          console.error("Failed to fetch cart from API", error);
-        }
-      },
-
-      synchronizeCart: async () => {
-        const { token } = await getUserCookie();
-
-        if (!token) {
-          console.warn("User not authenticated. Cannot synchronize cart.");
-          return;
-        }
-
-        const localCart = get().cart;
-
-        if (!localCart || localCart.items.length === 0) {
-          console.warn("No local cart found or it's empty.");
-          return;
-        }
-
-        try {
-          // Fetch the cart from the backend
-          const response = await apiClient.get<CartData>(`/api/carts`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-
           const serverCart = response.data;
+          const localCart = get().cart;
 
-          if (!serverCart || serverCart.items.length === 0) {
-            console.log("No existing cart on the server, sending local cart.");
-            await apiClient.post<CartData>(
-              `/api/carts/sync`,
-              { cart: localCart },
-              {
-                headers: { Authorization: `Bearer ${token}` },
-              }
-            );
-            set({ cart: localCart });
-            return;
-          }
-
-          // Check if carts are identical (product_id, quantity, total_price)
+          // Check if carts are identical (same product_id, quantity, and total_price)
           const isSameCart = (cartA: CartData, cartB: CartData) => {
             if (cartA.items.length !== cartB.items.length) return false;
 
@@ -314,14 +274,27 @@ export const useCartStore = create<CartState>()(
             });
           };
 
-          if (isSameCart(localCart, serverCart)) {
+          if (localCart && isSameCart(localCart, serverCart)) {
             console.log(
               "Local cart is identical to the server cart. No sync needed."
             );
-            return;
+            return set({ cart: serverCart });
           }
 
-          // Merge local cart with server cart
+          // If the server cart is empty, send the local cart
+          if (!serverCart || serverCart.items.length === 0) {
+            console.log("No existing server cart, sending local cart.");
+            await apiClient.post(
+              `/api/carts/sync`,
+              { cart: localCart },
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            );
+            return set({ cart: localCart });
+          }
+
+          // Merge carts (prioritizing local cart quantities)
           const mergedItemsMap = new Map<string, CartItem>();
 
           // Add server cart items first
@@ -330,14 +303,10 @@ export const useCartStore = create<CartState>()(
           }
 
           // Merge local cart items
-          for (const item of localCart.items) {
+          for (const item of localCart?.items || []) {
             if (mergedItemsMap.has(item.product_id)) {
               const existingItem = mergedItemsMap.get(item.product_id)!;
-
-              // ✅ If quantities are different, use the local cart's quantity
-              if (existingItem.quantity !== item.quantity) {
-                existingItem.quantity = item.quantity;
-              }
+              existingItem.quantity = item.quantity; // Prioritize local quantity
             } else {
               mergedItemsMap.set(item.product_id, { ...item });
             }
@@ -346,7 +315,7 @@ export const useCartStore = create<CartState>()(
           // Convert merged items map back to an array
           const mergedCartItems = Array.from(mergedItemsMap.values());
 
-          // Calculate total items and total price
+          // Calculate totals
           const mergedCart: CartData = {
             ...serverCart,
             items: mergedCartItems,
@@ -365,7 +334,7 @@ export const useCartStore = create<CartState>()(
           };
 
           // Send merged cart to the backend
-          const syncResponse = await apiClient.post<CartData>(
+          await apiClient.post(
             `/api/carts/sync`,
             { cart: mergedCart },
             {
@@ -373,9 +342,10 @@ export const useCartStore = create<CartState>()(
             }
           );
 
-          console.log("Cart synchronized successfully:", syncResponse.data);
+          console.log("Cart synchronized successfully");
+          set({ cart: mergedCart });
         } catch (error) {
-          console.error("Failed to synchronize cart with API", error);
+          console.error("Failed to fetch and sync cart from API", error);
         }
       },
     }),

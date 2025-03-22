@@ -1,4 +1,3 @@
-// import apiClient from "@/api/client/apiClient";
 import axios, { AxiosResponse, AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useJwt } from "./useJwt";
