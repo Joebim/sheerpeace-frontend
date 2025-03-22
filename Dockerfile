@@ -11,7 +11,7 @@ FROM base as builder
 WORKDIR /app
 COPY . .  
 
-# Ensure environment variables are available at build time
+# Inject environment variables before build
 ARG NEXT_PUBLIC_BASE_URL
 ENV NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
 
@@ -23,12 +23,6 @@ FROM base as production
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Ensure environment variables persist in the final container
-ARG NEXT_PUBLIC_BASE_URL
-ENV NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
-
-RUN npm ci --omit=dev 
-
 # Security: Create a non-root user for Next.js
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
@@ -39,6 +33,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/public ./public
+
+# Ensure environment variables are available at runtime
+RUN echo "NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}" >> /app/.env.production
 
 CMD ["npm", "start"]
 
