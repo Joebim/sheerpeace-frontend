@@ -23,9 +23,15 @@ FROM base as production
 WORKDIR /app
 ENV NODE_ENV=production
 
+# Inject environment variables before switching users
+ARG NEXT_PUBLIC_BASE_URL
+RUN echo "NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}" > /app/.env.production
+
 # Security: Create a non-root user for Next.js
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
+RUN chown -R nextjs:nodejs /app  # Ensure correct permissions
+
 USER nextjs
 
 # Copy necessary files from builder
@@ -33,9 +39,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/public ./public
-
-# Ensure environment variables are available at runtime
-RUN echo "NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}" >> /app/.env.production
 
 CMD ["npm", "start"]
 
