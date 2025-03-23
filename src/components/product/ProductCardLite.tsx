@@ -5,14 +5,12 @@ import { shortenText } from "@/utils/useShortenText";
 import Image from "next/image";
 import Like from "./Like";
 import Link from "next/link";
-import Rating from "../home/Rating";
-import AddToCart from "./AddToCart";
 
 interface ProductCardProps {
   product: Product;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+const ProductCardLite: React.FC<ProductCardProps> = ({ product }) => {
   const { formatPrice } = usePrice();
   return (
     <div className="relative rounded-[10px] overflow-hidden hover:shadow-md duration-300 ">
@@ -26,9 +24,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
         </div>
       )}
-      <div className="flex flex-col">
-        <Link href={`/products/${product.id}`} passHref>
-          <div className="w-full h-[100px] sm:h-[200px]">
+      <Link href={`/products/${product.id}`} passHref>
+        <div className="flex flex-col">
+          <div className="w-full h-[120px] sm:h-[200px]">
             <Image
               height={300}
               width={300}
@@ -38,33 +36,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               priority
             ></Image>
           </div>
-        </Link>
-
-        <div className="flex flex-col gap-[8px] p-[10px]">
-          <Link
-            href={`/products/${product.id}`}
-            className="flex flex-col gap-[8px]"
-            passHref
-          >
+          <div className="flex flex-col gap-[8px] p-[10px]">
             <h3 className="text-[10px] sm:text-[12px] font-bold">
               {shortenText(product?.name, 21)}
             </h3>
-            <div className="">
-              <Rating rating={product.average_rating} />
-            </div>
-          </Link>
-
-          <div className="w-full flex flex-row justify-between items-center">
-            <p className="text-[15px] font-bold">
-              {formatPrice(product?.price)}
-            </p>
-
-            <AddToCart product={product} />
+            <p className="text-[12px]">{formatPrice(product?.price)}</p>
           </div>
         </div>
-      </div>
+      </Link>
     </div>
   );
 };
 
-export default ProductCard;
+export default ProductCardLite;

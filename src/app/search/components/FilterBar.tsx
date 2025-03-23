@@ -1,115 +1,221 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { useCategoryStore } from "@/store/category.store";
+import { useBrandStore } from "@/store/brand.store";
+import { useSizeStore } from "@/store/size.store";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { DualRangeSlider } from "@/components/ui/dual-range-slider";
+import { useState } from "react";
 
-const brands = ["Nike", "Adidas", "Puma", "Gucci"];
-const colors = ["Red", "Blue", "Black", "White"];
+const genders = ["male", "female", "unisex"];
 
 const FilterBar = () => {
-  const { categories } = useCategoryStore();
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [filters, setFilters] = useState({
-    keyword: searchParams.get("keyword") || "",
-    category: searchParams.get("category") || undefined,  // ⬅️ Make default value undefined
-    minPrice: searchParams.get("min_price") || "",
-    maxPrice: searchParams.get("max_price") || "",
-    brand: searchParams.get("brand") || undefined,  // ⬅️ Make default value undefined
-    color: searchParams.get("color") || undefined,  // ⬅️ Make default value undefined
-  });
+  const { categories } = useCategoryStore();
+  const { brands } = useBrandStore();
+  const { sizes } = useSizeStore();
 
+  const selectedGender =
+    (searchParams.get("gender") as "male" | "female" | "unisex") || "unisex"; // Default to unisex
+
+  // Get initial values from search params
+  const initialMinPrice = Number(searchParams.get("min_price")) || 0;
+  const initialMaxPrice = Number(searchParams.get("max_price")) || 100;
+
+  const [priceRange, setPriceRange] = useState([
+    initialMinPrice,
+    initialMaxPrice,
+  ]);
+
+  // Function to update filters in the URL
   const updateFilters = (key: string, value: string | undefined) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+    const params = new URLSearchParams(window.location.search);
+
+    if (value) {
+      params.set(key, value.toLowerCase());
+    } else {
+      params.delete(key);
+    }
+
+    // Reset size filter when gender changes
+    if (key === "gender") {
+      params.delete("size");
+    }
+
+    router.replace(`/search?${params.toString()}`, { scroll: false });
   };
 
-  const applyFilters = () => {
-    const params = new URLSearchParams();
+  const handlePriceChange = (values: number[]) => {
+    setPriceRange(values);
 
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) params.set(key, value);
-    });
+    const params = new URLSearchParams(window.location.search);
+    params.set("min_price", values[0].toString());
+    params.set("max_price", values[1].toString());
 
-    router.push(`/search?${params.toString()}`);
+    router.replace(`/search?${params.toString()}`, { scroll: false });
   };
+
+  // Handle manual price input change
+  const handleInputChange = (index: number, value: string) => {
+    const newValues = [...priceRange];
+    newValues[index] = Number(value) || 0;
+    setPriceRange(newValues);
+  };
+
+  // Update filters when user presses "Enter" or inputs blur
+  const applyPriceFilter = () => {
+    console.log(priceRange);
+    updateFilters("min_price", priceRange[0].toString());
+    updateFilters("max_price", priceRange[1].toString());
+  };
+
+  const filteredSizes = sizes.filter((size) => size.gender === selectedGender);
 
   return (
-    <div className="flex flex-wrap gap-3 mb-6 bg-white p-4 rounded-lg shadow-md">
-      <Input
-        placeholder="Search..."
-        value={filters.keyword}
-        onChange={(e) => updateFilters("keyword", e.target.value)}
-      />
+    <div className="flex flex-col gap-[20px] w-full text-[12px]">
+      {/* Category Filter */}
+      <div className="flex flex-col gap-[10px]">
+        <span className="text-[15px] font-bold">Filter by Category</span>
+        <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto">
+          {categories.map((category) => {
+            const isActive =
+              searchParams.get("category") === category.name.toLowerCase();
+            return (
+              <div
+                key={category.name}
+                className="flex items-center space-x-2"
+                onClick={() =>
+                  updateFilters(
+                    "category",
+                    isActive ? undefined : category.name
+                  )
+                }
+              >
+                <Checkbox id={category.name} checked={isActive} />
+                <label htmlFor={category.name} className="text-sm font-medium">
+                  {category.name}
+                </label>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
-      {/* Category Select */}
-      <Select
-        value={filters.category}
-        onValueChange={(value) => updateFilters("category", value)}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select Category" />
-        </SelectTrigger>
-        <SelectContent>
-          {categories.map((cat) => (
-            <SelectItem key={cat.id} value={cat.name}>
-              {cat.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      {/* Price Filter */}
+      <div className="flex flex-col gap-[10px]">
+        <div className="flex flex-col gap-[50px]">
+          <span className="text-[15px] font-bold">Filter by Price</span>
+          <DualRangeSlider
+            label={(value) => `$${value}`}
+            value={priceRange}
+            onValueChange={handlePriceChange}
+            min={0}
+            max={100}
+            step={1}
+          />
+        </div>
 
-      {/* Brand Select */}
-      <Select
-        value={filters.brand}
-        onValueChange={(value) => updateFilters("brand", value)}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select Brand" />
-        </SelectTrigger>
-        <SelectContent>
-          {brands.map((brand) => (
-            <SelectItem key={brand} value={brand}>
-              {brand}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        <div className="flex flex-row items-center gap-[10px] justify-between">
+          <Input
+            type="number"
+            value={priceRange[0]}
+            min={0}
+            max={100}
+            onChange={(e) => handleInputChange(0, e.target.value)}
+            onBlur={applyPriceFilter}
+            onKeyDown={(e) => e.key === "Enter" && applyPriceFilter()}
+          />
+          <span>—</span>
+          <Input
+            type="number"
+            value={priceRange[1]}
+            min={0}
+            max={100}
+            onChange={(e) => handleInputChange(1, e.target.value)}
+            onBlur={applyPriceFilter}
+            onKeyDown={(e) => e.key === "Enter" && applyPriceFilter()}
+          />
+        </div>
+      </div>
 
-      {/* Color Select */}
-      <Select
-        value={filters.color}
-        onValueChange={(value) => updateFilters("color", value)}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select Color" />
-        </SelectTrigger>
-        <SelectContent>
-          {colors.map((color) => (
-            <SelectItem key={color} value={color}>
-              {color}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      {/* Brand Filter */}
+      <div className="flex flex-col gap-[15px]">
+        <span className="text-[15px] font-bold">Filter by Brands</span>
+        <div className="flex flex-wrap">
+          {brands.map((brand) => {
+            const isActive =
+              searchParams.get("brand") === brand.name.toLowerCase();
+            return (
+              <button
+                key={brand.name}
+                className={`border px-2 py-1 rounded-[3px] mr-2 mb-2 ${
+                  isActive ? "bg-sheerpeace-purple-secondary text-white" : ""
+                }`}
+                onClick={() =>
+                  updateFilters("brand", isActive ? undefined : brand.name)
+                }
+              >
+                {brand.name}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
-      <Input
-        type="number"
-        placeholder="Min Price"
-        value={filters.minPrice}
-        onChange={(e) => updateFilters("minPrice", e.target.value)}
-      />
-      <Input
-        type="number"
-        placeholder="Max Price"
-        value={filters.maxPrice}
-        onChange={(e) => updateFilters("maxPrice", e.target.value)}
-      />
-      <Button onClick={applyFilters}>Apply Filters</Button>
+      {/* Gender Filter */}
+      <div className="flex flex-col gap-[15px]">
+        <span className="text-[15px] font-bold">Filter by Gender</span>
+        <div className="flex flex-row gap-[5px]">
+          {genders.map((gender) => {
+            const isActive = selectedGender === gender;
+            return (
+              <button
+                key={gender}
+                className={`px-[0.65rem] py-1 rounded-full border text-[12px] ${
+                  isActive
+                    ? "bg-sheerpeace-purple-secondary text-white"
+                    : "bg-gray-200"
+                }`}
+                onClick={() => updateFilters("gender", gender)}
+              >
+                {gender.charAt(0).toUpperCase() + gender.slice(1)}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Size Filter */}
+      <div className="flex flex-col gap-[15px]">
+        <span className="text-[15px] font-bold">Filter by Sizes</span>
+        <div className="flex flex-wrap">
+          {filteredSizes.length > 0 ? (
+            filteredSizes.map((size) => {
+              const isActive =
+                searchParams.get("size") === size.label.toLowerCase();
+              return (
+                <button
+                  key={size.label}
+                  className={`bg-gray-200 px-2 py-1 rounded-full mr-2 mb-2 ${
+                    isActive ? "bg-gray-400" : ""
+                  }`}
+                  onClick={() =>
+                    updateFilters("size", isActive ? undefined : size.label)
+                  }
+                >
+                  {size.label}
+                </button>
+              );
+            })
+          ) : (
+            <p className="text-gray-500">No sizes available</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

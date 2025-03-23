@@ -7,6 +7,9 @@ import Pagination from "./Pagination";
 import axios from "axios";
 import { Product } from "@/types";
 import { useSearchParams } from "next/navigation";
+import { useWindowWidth } from "@/hooks/useWindowsWidth";
+import DynamicDrawer from "./DynamicDrawer";
+import { SlidersHorizontal } from "lucide-react";
 
 interface PaginatedData {
   products: Product[];
@@ -22,11 +25,9 @@ interface SearchApi {
   success: boolean;
 }
 
-const fetchSearchResults = async (query: string) => {
+const fetchSearchResults = async (params: string) => {
   const res = await axios.get(
-    `${
-      process.env.NEXT_PUBLIC_BASE_URL
-    }/api/products/search?name=${encodeURIComponent(query)}`
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/products/search?${params}`
   );
   if (res.status !== 200) throw new Error("Failed to fetch search results");
   return res.data;
@@ -34,23 +35,41 @@ const fetchSearchResults = async (query: string) => {
 
 const SearchPage = () => {
   const searchParams = useSearchParams();
-  const query = searchParams.get("query") || "";
+  const paramsString = searchParams.toString(); // Convert searchParams to a string
+  const { isDesktop } = useWindowWidth();
 
   const { data: results, isLoading } = useQuery<SearchApi>({
-    queryKey: ["searchResults", query],
-    queryFn: () => fetchSearchResults(query),
-    enabled: !!query,
+    queryKey: ["searchResults", paramsString], // Include all search parameters
+    queryFn: () => fetchSearchResults(paramsString),
+    enabled: !!paramsString, // Ensure query runs only when there are params
   });
 
   return (
-    <div className="container sm:px-12 px-[20px] pt-[25px] w-full">
+    <div className="flex flex-col gap-[20px] sm:px-12 px-[20px] pt-[25px] w-full">
       <h1 className="text-2xl font-semibold">
-        Search Results &quot;{query}&quot;
+        Search Results &quot;{searchParams.get("query") || ""}&quot;
       </h1>
 
       <div className="flex flex-col sm:flex-row gap-[20px]">
-        <div className="flex-[1]">
-          <FilterBar />
+        <div className="sm:w-[240px]">
+          {isDesktop ? (
+            <div className="bg-white p-[25px] rounded-lg shadow-md mb-6 ">
+              <FilterBar />
+            </div>
+          ) : (
+            <DynamicDrawer
+              trigger={
+                <>
+                  <SlidersHorizontal />
+                  <span>Filter</span>
+                </>
+              }
+            >
+              <div className="max-h-[450px] p-[25px] overflow-y-auto">
+                <FilterBar />
+              </div>
+            </DynamicDrawer>
+          )}
         </div>
 
         {isLoading ? (

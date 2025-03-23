@@ -7,6 +7,9 @@ import useNotificationStore from "@/store/notification.store";
 import { useCartStore } from "@/store/cart.store";
 import { useProductStore } from "@/store/product.store";
 import useWishlistStore from "@/store/wishlist.store";
+import { useBrandStore } from "@/store/brand.store";
+import { useColorStore } from "@/store/color.store";
+import { useSizeStore } from "@/store/size.store";
 
 export default function GlobalProvider({
   children,
@@ -18,6 +21,9 @@ export default function GlobalProvider({
   const { getNotifications } = useNotificationStore();
   const { getCartAndSync } = useCartStore();
   const { fetchWishlist } = useWishlistStore();
+  const { fetchBrands, brands } = useBrandStore();
+  const { fetchColors, colors } = useColorStore();
+  const { fetchSizes, sizes } = useSizeStore();
   const {
     fetchFeatured,
     fetchNew,
@@ -47,6 +53,13 @@ export default function GlobalProvider({
         !topSelling.length && fetchTopSelling(),
         !trending.length && fetchTrending(),
         !products.length && fetchProducts(),
+      ]);
+
+      // Fetch Other data
+      await Promise.allSettled([
+        !brands.length && fetchBrands(),
+        !colors.length && fetchColors(),
+        !sizes.length && fetchSizes(),
       ]);
 
       // Step 3: Fetch wishlist and notifications
