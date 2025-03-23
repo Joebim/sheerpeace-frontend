@@ -48,7 +48,7 @@ import { useSearchStore } from "@/store/search.store";
 import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
 import { SearchSuggestion } from "@/types";
 
-const ALLOWED_SEARCH_ROUTES = ["/", "/products/:id"];
+const ALLOWED_SEARCH_ROUTES = ["/", "/products/:id", "/search"];
 
 const UserNav: React.FC = () => {
   const { cart } = useCartStore();
@@ -60,12 +60,15 @@ const UserNav: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  const searchRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null as unknown as HTMLDivElement);
+  const suggestionRef = useRef<HTMLUListElement>(
+    null as unknown as HTMLUListElement
+  );
   const { term, suggestions, setTerm, fetchSuggestions } = useSearchStore();
   const router = useRouter();
 
   useClickOutside({
-    ref: searchRef,
+    refs: [searchRef, suggestionRef],
     callback: () => setShowSuggestions(false),
   });
 
@@ -123,9 +126,21 @@ const UserNav: React.FC = () => {
   };
 
   const handleSearch = (query: string) => {
-    router.push(`/search?query=${encodeURIComponent(query)}`);
-    setSearchTerm("");
-    setShowSuggestions(false);
+    if (!query.trim()) {
+      console.log("Empty query, skipping search");
+      return;
+    }
+
+    console.log("Search function called with query:", query);
+
+    try {
+      router.push(`/search?query=${encodeURIComponent(query)}`);
+      console.log("Navigation to search page successful");
+      // setSearchTerm("");
+      // setShowSuggestions(false);
+    } catch (error) {
+      console.error("Error navigating to search page:", error);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,8 +165,7 @@ const UserNav: React.FC = () => {
             </div>
             {/* Search Bar (Desktop) */}
             <div className="relative w-[60%] hidden sm:flex items-center">
-              <div className="w-full relative flex items-center gap-2 px-4 py-2 rounded-full bg-white">
-                <Search className="cursor-pointer text-[#e5b4ff]" />
+              <div className="w-full relative flex items-center gap-2 pl-5 pr-[0.3rem] py-[0.3rem] rounded-full bg-white">
                 <input
                   type="text"
                   placeholder="Search"
@@ -162,6 +176,12 @@ const UserNav: React.FC = () => {
                   onBlur={handleBlur}
                   onKeyDown={handleSearchSubmit}
                 />
+                <div
+                  className="cursor-pointer px-[15px] py-[1.5px] bg-sheerpeace-purple-secondary rounded-full"
+                  onClick={() => handleSearch(term)}
+                >
+                  <Search className="text-sheerpeace-purple w-[15px]" />
+                </div>
               </div>
 
               {showSuggestions && (
@@ -173,13 +193,17 @@ const UserNav: React.FC = () => {
                     <p className="px-4 py-2 text-gray-500">Loading...</p>
                   )}
                   {showSuggestions && (dynamicSuggestions?.length ?? 0) > 0 ? (
-                    <ul className="w-full">
+                    <ul ref={suggestionRef} className="w-full">
                       {dynamicSuggestions?.map(
                         (suggestion: SearchSuggestion, index: number) => (
                           <li
                             key={index}
                             className="p-2 px-[15px] flex flex-row justify-between hover:bg-gray-100 cursor-pointer items-center"
-                            onClick={() => handleSearch(suggestion.query)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              console.log("suggestion.query", suggestion.query);
+                              handleSearch(suggestion.query);
+                            }}
                           >
                             <span className="flex flex-row gap-[5px] items-center">
                               <Search className="w-[13px]" />
@@ -191,7 +215,10 @@ const UserNav: React.FC = () => {
                       )}
                     </ul>
                   ) : (
-                    <div className="flex flex-col gap-[10px] p-[20px] ">
+                    <div
+                      className="flex flex-col gap-[10px] p-[20px] "
+                      ref={searchRef}
+                    >
                       <span className="text-[14px] font-bold">
                         Trending Searches
                       </span>
@@ -200,7 +227,11 @@ const UserNav: React.FC = () => {
                           <div
                             key={index}
                             className="py-[4px] px-[10px] flex flex-row gap-[5px] border border-solid border-sheerpeace-black rounded-full text-sheerpeace-black items-center text-[13px] hover:bg-sheerpeace-purple duration-150 cursor-pointer  "
-                            onClick={() => handleSearch(item.query)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              console.log("suggestion.query", item.query);
+                              handleSearch(item.query);
+                            }}
                           >
                             <Search className="w-[13px]" />
                             <span>{item.query}</span>
@@ -214,41 +245,43 @@ const UserNav: React.FC = () => {
             </div>
 
             {/* Right Section - Actions */}
-            <div className="flex items-center gap-6">
-              {/* Notifications */}
-              <div className="relative">
-                <NotificationDropdown>
-                  <div>
-                    <Bell className="cursor-pointer text-sheerpeace-green hover:text-black" />
-                    {notifications.some((notif) => !notif.is_read) && (
-                      <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full"></span>
-                    )}
-                  </div>
-                </NotificationDropdown>
-              </div>
-
-              {/* Shopping Cart */}
-              <div className="relative">
-                <Link href="/cart">
-                  <ShoppingBag className="cursor-pointer text-sheerpeace-green hover:text-black" />
-                  {(cart?.items?.length ?? 0) > 0 && (
-                    <span className="absolute top-0 right-0 bg-purple-600 rounded-full h-[10px] w-[10px]"></span>
-                  )}
-                </Link>
-              </div>
-
-              {/* User Account */}
-              <UserDropdownMenu>
-                <div className="group cursor-pointer flex items-center gap-2">
-                  <CircleUserRound className=" stroke-sheerpeace-green w-[25px]" />
-                  <p className="hidden md:block text-sheerpeace-purple-secondary font-medium group-hover:text-black">
-                    {isAuthenticated
-                      ? `Hi, ${userDetails?.user.first_name}`
-                      : "Account"}
-                  </p>
-                  <ChevronDown className="hidden md:block text-sheerpeace-purple-secondary" />
+            <div className="flex items-center gap-6 justify-end md:w-[60%] lg:w-[40%] xl:w-[30%]">
+              <div className="flex items-center gap-6">
+                {/* Notifications */}
+                <div className="relative">
+                  <NotificationDropdown>
+                    <div>
+                      <Bell className="cursor-pointer text-sheerpeace-green hover:text-black" />
+                      {notifications.some((notif) => !notif.is_read) && (
+                        <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full"></span>
+                      )}
+                    </div>
+                  </NotificationDropdown>
                 </div>
-              </UserDropdownMenu>
+
+                {/* Shopping Cart */}
+                <div className="relative">
+                  <Link href="/cart">
+                    <ShoppingBag className="cursor-pointer text-sheerpeace-green hover:text-black" />
+                    {(cart?.items?.length ?? 0) > 0 && (
+                      <span className="absolute top-0 right-0 bg-purple-600 rounded-full h-[10px] w-[10px]"></span>
+                    )}
+                  </Link>
+                </div>
+
+                {/* User Account */}
+                <UserDropdownMenu>
+                  <div className="group cursor-pointer flex items-center gap-2">
+                    <CircleUserRound className=" stroke-sheerpeace-green w-[25px]" />
+                    <p className="hidden md:block text-sheerpeace-purple-secondary font-medium group-hover:text-black">
+                      {isAuthenticated
+                        ? `Hi, ${userDetails?.user.first_name}`
+                        : "Account"}
+                    </p>
+                    <ChevronDown className="hidden md:block text-sheerpeace-purple-secondary" />
+                  </div>
+                </UserDropdownMenu>
+              </div>
             </div>
           </div>
         </div>
@@ -410,8 +443,7 @@ const UserNav: React.FC = () => {
           </UserSideBar>{" "}
           {/* Search Bar (Mobile) */}
           {showSearch && (
-            <div className="relative w-full flex sm:hidden items-center gap-2 px-4 py-2 bg-white rounded-full">
-              <Search className="cursor-pointer text-[#e5b4ff]" />
+            <div className="relative w-full flex sm:hidden items-center gap-2 pl-5 pr-[0.3rem] py-[0.3rem] bg-white rounded-full">
               <input
                 type="text"
                 placeholder="Search"
@@ -422,6 +454,12 @@ const UserNav: React.FC = () => {
                 onBlur={handleBlur}
                 onKeyDown={handleSearchSubmit}
               />
+              <div
+                className="cursor-pointer px-[15px] py-[1.5px] bg-sheerpeace-purple-secondary rounded-full"
+                onClick={() => handleSearch(term)}
+              >
+                <Search className="text-sheerpeace-purple w-[15px]" />
+              </div>
             </div>
           )}
           {showSuggestions && (
@@ -433,7 +471,7 @@ const UserNav: React.FC = () => {
                 <p className="px-4 py-2 text-gray-500">Loading...</p>
               )}
               {showSuggestions && (dynamicSuggestions?.length ?? 0) > 0 ? (
-                <ul className="w-full">
+                <ul className="w-full" ref={suggestionRef}>
                   {dynamicSuggestions?.map(
                     (suggestion: SearchSuggestion, index: number) => (
                       <li
@@ -451,7 +489,10 @@ const UserNav: React.FC = () => {
                   )}
                 </ul>
               ) : (
-                <div className="flex flex-col gap-[10px] p-[20px] ">
+                <div
+                  className="flex flex-col gap-[10px] p-[20px]"
+                  ref={searchRef}
+                >
                   <span className="text-[14px] font-bold">
                     Trending Searches
                   </span>

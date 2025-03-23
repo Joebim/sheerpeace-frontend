@@ -10,7 +10,7 @@ const Footer = () => {
           <div className="md:w-1/3 flex flex-col sm:flex-row items-center">
             <SheerpeaceWordmark className="fill-white scale-90" />
             <span className="mx-6">|</span>
-            <p className="text-sm text-gray-400">Gift & Decoration Store</p>
+            <p className="text-sm text-gray-400">Peaceful Essentials Store</p>
           </div>
 
           {/* Center Section - Navigation */}
@@ -49,7 +49,7 @@ const Footer = () => {
         {/* Bottom Section - Copyright */}
         <div className="flex flex-col-reverse sm:flex-row items-center gap-[20px]">
           <div className="text-center text-sm text-gray-400">
-            <p>Copyright © 2023 3legant. All rights reserved.</p>
+            <p>Copyright © 2025 Sheerpeace. All rights reserved.</p>
           </div>
 
           {/* Right Section - Policies */}

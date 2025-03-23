@@ -9,7 +9,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { ArrowRight } from "lucide-react";
-import ProductCard from "@/components/product/ProductCard";
+import ProductCardLite from "@/components/product/ProductCardLite";
 import { Product } from "@/types";
 import ProductCardSkeleton from "@/components/product/ProductCardSkeleton";
 
@@ -66,7 +66,7 @@ const ProductSection: React.FC<ProductSectionProps> = ({
                       key={product.id}
                       className="basis-1/3 md:basis-1/4 lg:basis-1/5"
                     >
-                      <ProductCard product={product} />
+                      <ProductCardLite product={product} />
                     </CarouselItem>
                   ))}
             </CarouselContent>

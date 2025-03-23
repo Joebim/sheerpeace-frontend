@@ -67,17 +67,6 @@ const UserSideBar: React.FC<UserSideBarProps> = ({ children, categories }) => {
               <span className="text-sheerpeace-purple-secondary">See All</span>
             </div>
             <ul className="flex flex-col gap-[10px]">
-              <li>J-Force</li>
-              <li>Pay Airtime & Bills</li>
-              <li>Pay Electricity Bills</li>
-              <li>Pay Internet Bills</li>
-              <li>Buy Data</li>
-              <li>Sell on Jumia</li>
-              <li>Service Center</li>
-              <li>Contact us</li>
-            </ul>
-            <hr className="border-gray-300" />
-            <ul className="flex flex-col gap-[10px]">
               <li>Sell on Jumia</li>
               <li>Service Center</li>
               <li>Contact us</li>
