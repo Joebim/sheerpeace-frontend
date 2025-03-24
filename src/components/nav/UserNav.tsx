@@ -16,7 +16,7 @@ import {
   Search,
   ShoppingBag,
 } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { NotificationDropdown } from "../home/NotificationDropdown";
 import useNotificationStore from "@/store/notification.store";
 import SheerpeaceWordmark from "../../../public/sheerpeace-word-mark.svg";
@@ -32,6 +32,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import useHandleSearch from "@/hooks/useHandleSearch";
 
 import { NavigationMenu as NavigationMenuCopy } from "../ui/navigation-menu copy";
 
@@ -60,12 +61,13 @@ const UserNav: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
 
+  const { handleSearch, handleSearchSubmit } = useHandleSearch();
+
   const searchRef = useRef<HTMLDivElement>(null as unknown as HTMLDivElement);
   const suggestionRef = useRef<HTMLUListElement>(
     null as unknown as HTMLUListElement
   );
   const { term, suggestions, setTerm, fetchSuggestions } = useSearchStore();
-  const router = useRouter();
 
   useClickOutside({
     refs: [searchRef, suggestionRef],
@@ -116,33 +118,6 @@ const UserNav: React.FC = () => {
     setTimeout(() => setShowSuggestions(false), 200);
   };
 
-  const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && searchTerm.trim()) {
-      e.preventDefault();
-      router.push(`/search?query=${encodeURIComponent(searchTerm)}`);
-      setSearchTerm("");
-      setShowSuggestions(false);
-    }
-  };
-
-  const handleSearch = (query: string) => {
-    if (!query.trim()) {
-      console.log("Empty query, skipping search");
-      return;
-    }
-
-    console.log("Search function called with query:", query);
-
-    try {
-      router.push(`/search?query=${encodeURIComponent(query)}`);
-      console.log("Navigation to search page successful");
-      // setSearchTerm("");
-      // setShowSuggestions(false);
-    } catch (error) {
-      console.error("Error navigating to search page:", error);
-    }
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
@@ -174,11 +149,11 @@ const UserNav: React.FC = () => {
                   onChange={handleInputChange}
                   onFocus={handleFocus}
                   onBlur={handleBlur}
-                  onKeyDown={handleSearchSubmit}
+                  onKeyDown={(e) => handleSearchSubmit(e, searchTerm)}
                 />
                 <div
                   className="cursor-pointer px-[15px] py-[1.5px] bg-sheerpeace-purple-secondary rounded-full"
-                  onClick={() => handleSearch(term)}
+                  onClick={() => handleSearch(term, "name")}
                 >
                   <Search className="text-sheerpeace-purple w-[15px]" />
                 </div>
@@ -201,8 +176,7 @@ const UserNav: React.FC = () => {
                             className="p-2 px-[15px] flex flex-row justify-between hover:bg-gray-100 cursor-pointer items-center"
                             onClick={(e) => {
                               e.stopPropagation();
-                              console.log("suggestion.query", suggestion.query);
-                              handleSearch(suggestion.query);
+                              handleSearch(suggestion.query, "name");
                             }}
                           >
                             <span className="flex flex-row gap-[5px] items-center">
@@ -229,8 +203,7 @@ const UserNav: React.FC = () => {
                             className="py-[4px] px-[10px] flex flex-row gap-[5px] border border-solid border-sheerpeace-black rounded-full text-sheerpeace-black items-center text-[13px] hover:bg-sheerpeace-purple duration-150 cursor-pointer  "
                             onClick={(e) => {
                               e.stopPropagation();
-                              console.log("suggestion.query", item.query);
-                              handleSearch(item.query);
+                              handleSearch(item.query, "name");
                             }}
                           >
                             <Search className="w-[13px]" />
@@ -452,11 +425,11 @@ const UserNav: React.FC = () => {
                 onChange={handleInputChange}
                 onFocus={handleFocus}
                 onBlur={handleBlur}
-                onKeyDown={handleSearchSubmit}
+                onKeyDown={(e) => handleSearchSubmit(e, searchTerm)}
               />
               <div
                 className="cursor-pointer px-[15px] py-[1.5px] bg-sheerpeace-purple-secondary rounded-full"
-                onClick={() => handleSearch(term)}
+                onClick={() => handleSearch(term, "name")}
               >
                 <Search className="text-sheerpeace-purple w-[15px]" />
               </div>
@@ -477,7 +450,7 @@ const UserNav: React.FC = () => {
                       <li
                         key={index}
                         className="p-2 px-[15px] flex flex-row justify-between hover:bg-gray-100 cursor-pointer items-center"
-                        onClick={() => handleSearch(suggestion.query)}
+                        onClick={() => handleSearch(suggestion.query, "name")}
                       >
                         <span className="flex flex-row gap-[5px] items-center">
                           <Search className="w-[13px]" />
@@ -501,7 +474,7 @@ const UserNav: React.FC = () => {
                       <div
                         key={index}
                         className="py-[4px] px-[10px] flex flex-row gap-[5px] border border-solid border-sheerpeace-black rounded-full text-sheerpeace-black items-center text-[13px] hover:bg-sheerpeace-purple duration-150 cursor-pointer  "
-                        onClick={() => handleSearch(item.query)}
+                        onClick={() => handleSearch(item.query, "name")}
                       >
                         <Search className="w-[13px]" />
                         <span>{item.query}</span>

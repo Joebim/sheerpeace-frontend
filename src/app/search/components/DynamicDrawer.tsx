@@ -35,7 +35,7 @@ export default function DynamicDrawer({
         </DrawerHeader>
         {children}
         <DrawerFooter>
-          <DrawerClose>
+          <DrawerClose asChild>
             <Button variant="outline">Cancel</Button>
           </DrawerClose>
         </DrawerFooter>

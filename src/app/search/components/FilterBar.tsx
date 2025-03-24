@@ -68,7 +68,6 @@ const FilterBar = () => {
 
   // Update filters when user presses "Enter" or inputs blur
   const applyPriceFilter = () => {
-    console.log(priceRange);
     updateFilters("min_price", priceRange[0].toString());
     updateFilters("max_price", priceRange[1].toString());
   };

@@ -3,13 +3,14 @@
 import { useQuery } from "@tanstack/react-query";
 import ProductCard from "@/components/product/ProductCard";
 import FilterBar from "./FilterBar";
-import Pagination from "./Pagination";
 import axios from "axios";
 import { Product } from "@/types";
 import { useSearchParams } from "next/navigation";
 import { useWindowWidth } from "@/hooks/useWindowsWidth";
 import DynamicDrawer from "./DynamicDrawer";
 import { SlidersHorizontal } from "lucide-react";
+import PaginationBar from "./Pagination";
+import SearchHeader from "./SearchHeader";
 
 interface PaginatedData {
   products: Product[];
@@ -35,6 +36,7 @@ const fetchSearchResults = async (params: string) => {
 
 const SearchPage = () => {
   const searchParams = useSearchParams();
+
   const paramsString = searchParams.toString(); // Convert searchParams to a string
   const { isDesktop } = useWindowWidth();
 
@@ -45,15 +47,12 @@ const SearchPage = () => {
   });
 
   return (
-    <div className="flex flex-col gap-[20px] sm:px-12 px-[20px] pt-[25px] w-full">
-      <h1 className="text-2xl font-semibold">
-        Search Results &quot;{searchParams.get("query") || ""}&quot;
-      </h1>
-
+    <div className="flex flex-col gap-[20px] sm:px-12 px-[20px] py-[25px] w-full">
+      <SearchHeader />
       <div className="flex flex-col sm:flex-row gap-[20px]">
         <div className="sm:w-[240px]">
           {isDesktop ? (
-            <div className="bg-white p-[25px] rounded-lg shadow-md mb-6 ">
+            <div className="bg-white p-[25px] rounded-lg shadow-md mb-6 sticky top-[130px] overflow-y-auto h-[70vh]">
               <FilterBar />
             </div>
           ) : (
@@ -75,13 +74,13 @@ const SearchPage = () => {
         {isLoading ? (
           <p>Loading...</p>
         ) : results?.data?.products?.length ? (
-          <div className="flex flex-col gap-[2p0x] flex-[5]">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-4">
+          <div className="flex flex-col gap-[20px] flex-[5]">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-4 sm:min-h-[180vh]">
               {results?.data?.products?.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
-            <Pagination
+            <PaginationBar
               totalPages={results.data.totalPages}
               currentPage={results.data.page}
             />

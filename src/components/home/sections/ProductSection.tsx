@@ -12,17 +12,20 @@ import { ArrowRight } from "lucide-react";
 import ProductCardLite from "@/components/product/ProductCardLite";
 import { Product } from "@/types";
 import ProductCardSkeleton from "@/components/product/ProductCardSkeleton";
+import Link from "next/link";
 
 interface ProductSectionProps {
   headerTitle: string;
   products: Product[] | undefined;
   loading: boolean | undefined;
+  snug: string;
 }
 
 const ProductSection: React.FC<ProductSectionProps> = ({
   headerTitle,
   products,
   loading,
+  snug,
 }) => {
   const [productLoading, setProductLoading] = useState(true);
 
@@ -41,12 +44,15 @@ const ProductSection: React.FC<ProductSectionProps> = ({
           <h2 className="text-[13px] sm:text-[18px]  font-bold text-center self-start">
             {headerTitle}
           </h2>
-          <div className="flex flex-row gap-[10px] items-center">
-            <span className="font-bold text-[14px]">See More</span>
-            <div className="h-[25px] w-[25px] rounded-full bg-primary-100 flex justify-center items-center">
-              <ArrowRight className="text-light w-[17px]" />
+          <Link href={`/${snug}`}>
+            <div className="flex flex-row gap-[10px] items-center">
+              <span className="font-bold text-[14px]">See More</span>
+
+              <div className="h-[25px] w-[25px] rounded-full bg-primary-100 flex justify-center items-center">
+                <ArrowRight className="text-light w-[17px]" />
+              </div>
             </div>
-          </div>
+          </Link>
         </div>
 
         <div className="w-full">
