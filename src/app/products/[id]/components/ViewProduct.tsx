@@ -299,11 +299,13 @@ export default function ViewProduct({ productId }: ViewProductProps) {
             headerTitle="Featured Products"
             products={products?.products}
             loading={loading}
+            snug="is_featured"
           />
           <ProductSection
             headerTitle="Featured Products"
             products={products?.products}
             loading={loading}
+            snug="is_featured"
           />
         </div>
 
