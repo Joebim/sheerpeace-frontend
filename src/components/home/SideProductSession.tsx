@@ -11,6 +11,7 @@ import {
 import { type CarouselApi } from "@/components/ui/carousel";
 import SideProductCard from "./SideProductCard";
 import SideProductSkeleton from "./SideProductSkeleton";
+import Link from "next/link";
 
 interface SideProductSessionProps {
   title: string;
@@ -92,15 +93,14 @@ export default function SideProductSession({
             chunkedProducts.map((productChunk, index) => (
               <CarouselItem key={index} className="basis-1/1">
                 <div className="flex flex-col gap-4 w-[200px]">
-                  {productChunk.map((product, productIndex) => (
-                    <Card
-                      key={productIndex}
-                      className="shadow-none border-none"
-                    >
-                      <CardContent className="flex items-center justify-center p-0">
-                        <SideProductCard product={product} />
-                      </CardContent>
-                    </Card>
+                  {productChunk.map((product) => (
+                    <Link href="" key={product.id}>
+                      <Card className="shadow-none border-none">
+                        <CardContent className="flex items-center justify-center p-0">
+                          <SideProductCard product={product} />
+                        </CardContent>
+                      </Card>
+                    </Link>
                   ))}
                 </div>
               </CarouselItem>

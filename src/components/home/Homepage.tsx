@@ -60,12 +60,14 @@ const Homepage: NextPage = ({}) => {
               headerTitle="Featured Products"
               products={isFeatured}
               loading={loading}
+              snug="is_featured"
             />
 
             <ProductSection
               headerTitle="New Arrivals"
               products={isNew}
               loading={loading}
+              snug="is_new"
             />
 
             <BannerSection image="/uploads/images/1740796144633-998540990.png" />
@@ -83,11 +85,13 @@ const Homepage: NextPage = ({}) => {
               headerTitle="Trending Products"
               products={trending}
               loading={loading}
+              snug="trending"
             />
             <ProductSection
               headerTitle="Top Choice"
               products={topChoice}
               loading={loading}
+              snug="top_choice"
             />
 
             <DealSession
