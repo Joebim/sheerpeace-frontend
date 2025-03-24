@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Category, SubCategory } from "@/types";
 import Image from "next/image";
 import { renderImageUrl } from "@/hooks/useRenderImageUrl";
+import useHandleSearch from "@/hooks/useHandleSearch";
 
 interface categoryProps {
   subcategories: SubCategory[];
@@ -23,13 +24,14 @@ export default function CategorySelection({
   categories,
   loading,
 }: categoryProps) {
-
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null
   );
   const [filteredSubcategories, setFilteredSubcategories] = useState<
     Category[]
   >([]);
+
+  const { handleSearch } = useHandleSearch();
 
   useEffect(() => {
     if (categories.length > 0) {
@@ -94,6 +96,7 @@ export default function CategorySelection({
                 <div
                   key={subcategory.id}
                   className="p-[5px] flex flex-col items-center gap-[5px] text-center cursor-pointer"
+                  onClick={() => handleSearch(subcategory.name, "subcategory")}
                 >
                   <div className="h-[50px] rounded-[5px] overflow-hidden w-full">
                     <Image

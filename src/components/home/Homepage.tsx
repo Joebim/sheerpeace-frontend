@@ -68,7 +68,7 @@ const Homepage: NextPage = ({}) => {
               loading={loading}
             />
 
-            <BannerSection />
+            <BannerSection image="/uploads/images/1740796144633-998540990.png" />
 
             <SalesBanner
               offerText="SALE UP TO"

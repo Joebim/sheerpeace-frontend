@@ -15,7 +15,7 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { formatPrice } = usePrice();
   return (
-    <div className="relative rounded-[10px] overflow-hidden hover:shadow-md duration-300 ">
+    <div className="relative rounded-[10px] overflow-hidden hover:shadow-md duration-300 self-start">
       <div className="z-[2] scale-75 absolute flex top-[5px] right-[5px] justify-center items-center h-[30px] sm:h-[40px] w-[30px] sm:w-[40px] rounded-full shadow-sm bg-white p-[4px] sm:p-[8px]">
         <Like productId={product.id} />
       </div>
